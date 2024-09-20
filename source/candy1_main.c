@@ -6,7 +6,7 @@
 	(2º curso de Grado de Ingeniería Informática - ETSE - URV)
 	
 	Analista-programador: santiago.romani@urv.cat
-	Programador 1: xxx.xxx@estudiants.urv.cat
+	Programador 1: david.quintana@estudiants.urv.cat
 	Programador 2: yyy.yyy@estudiants.urv.cat
 	Programador 3: zzz.zzz@estudiants.urv.cat
 	Programador 4: uuu.uuu@estudiants.urv.cat
@@ -447,73 +447,30 @@ void procesa_sugerencia(char mat[][COLUMNS], unsigned short lap)
 int main(void)
 {
 	unsigned char level = 0;		// nivel del juego (nivel inicial = 0)
-	short points = 0;				// contador de puntos
-	unsigned char moves = 0;		// número de movimientos restantes
-	unsigned char gelees = 0;		// número de gelatinas restantes
 	
-	unsigned char state = E_INIT;	// estado actual del programa
-	unsigned short lapse = 0;		// contador VBLs inactividad del usuario
-	unsigned char ret;				// código de retorno de funciones auxiliares
+	seed32 = time(NULL);		// fija semilla de números aleatorios
+	consoleDemoInit();			// inicialización de pantalla de texto
+	printf("candyNDS (prueba tarea 1A)\n");
+	printf("\x1b[38m\x1b[1;0H  nivel: %d", level);
 
-	seed32 = time(NULL);			// fija semilla inicial números aleatorios
-	consoleDemoInit();				// inicializa pantalla de texto
-	printf("candyNDS (version 1: texto)\n");
-	printf("\x1b[38m\x1b[1;0H  nivel:");
-	printf("\x1b[39m\x1b[2;0H puntos:");
-	printf("\x1b[38m\x1b[1;15H movimientos:");
-	printf("\x1b[37m\x1b[2;15H   gelatinas:");
-
-	do								// bucle principal del juego
+	do							// bucle principal de pruebas
 	{
-		swiWaitForVBlank();
-		scanKeys();
-		switch (state)
-		{
-			case E_INIT:		//////	ESTADO DE INICIALIZACIÓN	//////
-						inicializa_nivel(matrix, level, &points, &moves, &gelees);
-						lapse = 0;
-						if (hay_secuencia(matrix))	state = E_BREAK;
-						else if (!hay_combinacion(matrix))	state = E_CHECK;
-						else	state = E_PLAY;
-						break;
-			case E_PLAY:		//////	ESTADO DE INTERACCIÓN CON USUARIO //////
-						if (keysHeld() & KEY_TOUCH)		// detecta pulsación en pantalla
-						{
-							lapse = 0;				// reinicia tiempo de inactividad
-							if (procesa_pulsacion(matrix, points, &moves, gelees))
-								state = E_BREAK;	// si hay secuencia, pasa a romperla
-						}
-						else
-						{	lapse++;				// cuenta tiempo (VBLs) de inactividad
-							if (lapse >= T_INACT)	// a partir de cierto tiempo de inactividad,
-								procesa_sugerencia(matrix, lapse);
-						}
-#ifdef TRUCOS
-						testing(&state, matrix, level, &points, &moves, &gelees);
-#endif
-						break;
-			case E_BREAK:		//////	ESTADO DE ROMPER SECUENCIAS	//////
-						procesa_rotura(matrix, level, &points, moves, &gelees);
-						lapse = 0;
-						state = E_FALL;
-						break;
-			case E_FALL:		//////	ESTADO DE CAÍDA DE ELEMENTOS	//////
-						ret = procesa_caida(matrix, points, moves, gelees);
-											// cuando ya no haya más bajadas,
-						if (ret == PC_ENDNOSQ)	state = E_CHECK;		// comprueba situación del juego
-						else if (ret == PC_ENDSEQ)	state = E_BREAK;	// o rompe secuencia (si la hay)
-						// si ha habido algún movimiento de caída, sigue en estado E_FALL
-						break;
-			case E_CHECK:		//////	ESTADO DE VERIFICACIÓN	//////
-						ret = comprueba_jugada(matrix, &level, points, moves, gelees);
-						if (ret == CJ_LEVEL)	state = E_INIT;			// nuevo nivel o reiniciar nivel
-						else if ((ret == CJ_CONT) || (ret == CJ_RCOMB))	// si no ha pasado nada especial o ha habido recombinación con posible secuencia,
-							state = E_PLAY;		//  sigue jugando
-						// si ha habido recombinación sin nueva combinación, sigue en estado E_CHECK
-						break;
+		inicializa_matriz(matrix, level);
+		escribe_matriz_testing(matrix);
+		retardo(3);
+		printf("\x1b[39m\x1b[3;8H (pulse A o B)");
+		do
+		{	swiWaitForVBlank();
+			scanKeys();					// esperar pulsación tecla 'A' o 'B'
+		} while (!(keysHeld() & (KEY_A | KEY_B)));
+		printf("\x1b[3;8H              ");
+		retardo(3);
+		if (keysHeld() & KEY_A)			// si pulsa 'A',
+		{								// pasa a siguiente nivel
+			level = (level + 1) % MAXLEVEL;
+			printf("\x1b[38m\x1b[1;8H %d", level);
 		}
-	} while (1);				// bucle infinito
-	
-	return(0);					// nunca retornará del main
+	} while (1);
+	return(0);
 }
 
