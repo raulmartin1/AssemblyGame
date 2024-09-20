@@ -443,77 +443,62 @@ void procesa_sugerencia(char mat[][COLUMNS], unsigned short lap)
 
 
 
-/* Programa principal: control general del juego */
+/* ---------------------------------------------------------------- */
+/* candy1_main.c : función principal main() para test de tarea 1E 	*/
+/* ---------------------------------------------------------------- */
+#define NUMTESTS 14
+short nmap[] = {4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 8};
+short posX[] = {0, 0, 0, 0, 4, 4, 4, 0, 0, 5, 4, 1, 1, 1};
+short posY[] = {2, 2, 2, 2, 4, 4, 4, 0, 0, 0, 4, 3, 3, 5};
+short cori[] = {0, 1, 2, 3, 0, 1, 2, 0, 3, 0, 0, 1, 3, 0};
+short resp[] = {1, 2, 1, 1, 2, 1, 1, 3, 1, 3, 5, 2, 4, 2};
+
 int main(void)
 {
-	unsigned char level = 0;		// nivel del juego (nivel inicial = 0)
-	short points = 0;				// contador de puntos
-	unsigned char moves = 0;		// número de movimientos restantes
-	unsigned char gelees = 0;		// número de gelatinas restantes
-	
-	unsigned char state = E_INIT;	// estado actual del programa
-	unsigned short lapse = 0;		// contador VBLs inactividad del usuario
-	unsigned char ret;				// código de retorno de funciones auxiliares
+	unsigned char level;			// nivel del juego
+	unsigned char ntest = 0;		// número de test
+	unsigned char result;			// resultado de cuenta_repeticiones()
 
-	seed32 = time(NULL);			// fija semilla inicial números aleatorios
-	consoleDemoInit();				// inicializa pantalla de texto
-	printf("candyNDS (version 1: texto)\n");
-	printf("\x1b[38m\x1b[1;0H  nivel:");
-	printf("\x1b[39m\x1b[2;0H puntos:");
-	printf("\x1b[38m\x1b[1;15H movimientos:");
-	printf("\x1b[37m\x1b[2;15H   gelatinas:");
-
-	do								// bucle principal del juego
+	consoleDemoInit();			// inicialización de pantalla de texto
+	printf("candyNDS (prueba tarea 1E)\n");
+	level = nmap[0];
+	printf("\x1b[38m\x1b[1;0H  nivel: %d", level);
+	copia_matriz(matrix, mapas[level]);
+	escribe_matriz_testing(matrix);
+	do							// bucle principal de pruebas
 	{
-		swiWaitForVBlank();
-		scanKeys();
-		switch (state)
+		printf("\x1b[39m\x1b[2;0H test %d: posXY (%d, %d), c.ori %d",
+									ntest, posX[ntest], posY[ntest], cori[ntest]);
+		printf("\x1b[39m\x1b[3;0H resultado esperado: %d", resp[ntest]);
+		
+		result = cuenta_repeticiones(matrix, posY[ntest], posX[ntest], cori[ntest]);
+		
+		printf("\x1b[39m\x1b[4;0H resultado obtenido: %d", result);
+		retardo(3);
+		printf("\x1b[38m\x1b[5;19H (pulse A/B)");
+		do
+		{	swiWaitForVBlank();
+			scanKeys();					// esperar pulsación tecla 'A' o 'B'
+		} while (!(keysHeld() & (KEY_A | KEY_B)));
+		printf("\x1b[2;0H                               ");
+		printf("\x1b[3;0H                               ");
+		printf("\x1b[4;0H                               ");
+		printf("\x1b[38m\x1b[5;19H            ");
+		retardo(3);
+		if (keysHeld() & KEY_A)		// si pulsa 'A',
 		{
-			case E_INIT:		//////	ESTADO DE INICIALIZACIÓN	//////
-						inicializa_nivel(matrix, level, &points, &moves, &gelees);
-						lapse = 0;
-						if (hay_secuencia(matrix))	state = E_BREAK;
-						else if (!hay_combinacion(matrix))	state = E_CHECK;
-						else	state = E_PLAY;
-						break;
-			case E_PLAY:		//////	ESTADO DE INTERACCIÓN CON USUARIO //////
-						if (keysHeld() & KEY_TOUCH)		// detecta pulsación en pantalla
-						{
-							lapse = 0;				// reinicia tiempo de inactividad
-							if (procesa_pulsacion(matrix, points, &moves, gelees))
-								state = E_BREAK;	// si hay secuencia, pasa a romperla
-						}
-						else
-						{	lapse++;				// cuenta tiempo (VBLs) de inactividad
-							if (lapse >= T_INACT)	// a partir de cierto tiempo de inactividad,
-								procesa_sugerencia(matrix, lapse);
-						}
-#ifdef TRUCOS
-						testing(&state, matrix, level, &points, &moves, &gelees);
-#endif
-						break;
-			case E_BREAK:		//////	ESTADO DE ROMPER SECUENCIAS	//////
-						procesa_rotura(matrix, level, &points, moves, &gelees);
-						lapse = 0;
-						state = E_FALL;
-						break;
-			case E_FALL:		//////	ESTADO DE CAÍDA DE ELEMENTOS	//////
-						ret = procesa_caida(matrix, points, moves, gelees);
-											// cuando ya no haya más bajadas,
-						if (ret == PC_ENDNOSQ)	state = E_CHECK;		// comprueba situación del juego
-						else if (ret == PC_ENDSEQ)	state = E_BREAK;	// o rompe secuencia (si la hay)
-						// si ha habido algún movimiento de caída, sigue en estado E_FALL
-						break;
-			case E_CHECK:		//////	ESTADO DE VERIFICACIÓN	//////
-						ret = comprueba_jugada(matrix, &level, points, moves, gelees);
-						if (ret == CJ_LEVEL)	state = E_INIT;			// nuevo nivel o reiniciar nivel
-						else if ((ret == CJ_CONT) || (ret == CJ_RCOMB))	// si no ha pasado nada especial o ha habido recombinación con posible secuencia,
-							state = E_PLAY;		//  sigue jugando
-						// si ha habido recombinación sin nueva combinación, sigue en estado E_CHECK
-						break;
+			ntest++;				// siguiente test
+			if ((ntest < NUMTESTS) && (nmap[ntest] != level))
+			{				// si número de mapa del siguiente test diferente
+				level = nmap[ntest];		// del número de mapa actual,
+				printf("\x1b[38m\x1b[1;8H %d", level); // cambiar el mapa actual
+				copia_matriz(matrix, mapas[level]);
+				escribe_matriz_testing(matrix);
+			}
 		}
-	} while (1);				// bucle infinito
-	
-	return(0);					// nunca retornará del main
+	} while (ntest < NUMTESTS);		// bucle de pruebas
+	printf("\x1b[38m\x1b[5;19H (fin tests)");
+	do { swiWaitForVBlank(); } while(1);	// bucle infinito
+	return(0);
 }
 
