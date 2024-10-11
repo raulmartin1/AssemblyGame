@@ -450,7 +450,7 @@ int main(void)
 	
 	seed32 = time(NULL);		// fija semilla de números aleatorios
 	consoleDemoInit();			// inicialización de pantalla de texto
-	printf("candyNDS (prueba tarea 1A)\n");
+	printf("candyNDS (prueba tarea 1A i 1B)\n");
 	printf("\x1b[38m\x1b[1;0H  nivel: %d", level);
 
 	do							// bucle principal de pruebas
@@ -465,11 +465,20 @@ int main(void)
 		} while (!(keysHeld() & (KEY_A | KEY_B)));
 		printf("\x1b[3;8H              ");
 		retardo(3);
+		
 		if (keysHeld() & KEY_A)			// si pulsa 'A',
 		{								// pasa a siguiente nivel
 			level = (level + 1) % MAXLEVEL;
 			printf("\x1b[38m\x1b[1;8H %d", level);
 		}
+		
+		if(keysHeld() & KEY_B){		//Si toques la tecla B, recombina la matriu del nivell i fa un retard per que es pugui
+									//visualitzar b�
+			recombina_elementos(matrix);
+			escribe_matriz_testing(matrix);
+			retardo(15);
+		}
+		
 	} while (1);
 	return(0);
 }
