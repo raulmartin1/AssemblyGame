@@ -237,10 +237,270 @@ sugiere_combinacion:
 @;	Resultado:
 @;		vector de posiciones (x1,y1,x2,y2,x3,y3), devuelto por referencia
 genera_posiciones:
-		push {lr}
-		
-		
-		pop {pc}
+		push {r1-r5, lr}
+		cmp r4, #0	@; comparamos c.p.i=0 , c.ori pot ser 1,2,3 o 5
+		bne .Lsaltar_cpi0
+			add r2, #1 @; sumamos una columna, posicion de la derecha
+			mov r5, #0 @; inicializamos vector
+			strb r2, [r0, r5] @; guardamos de la derecha (x1=columna) 
+			sub r2, #1 @;vuelve a la columna inicial
+			add r5, #1			@; siguiente posicion del vector
+			strb r1, [r0, r5]   @; guardamos la fila inicial (y1=fila)
+			cmp r3, #1			@; comprovamos c.ori=1
+			bne .Lsaltar_cori1_0
+				add r5, #1			@; siguiente posicion del vector
+				strb r2, [r0, r5]	@; columna se queda igual 
+				add r5, #1			@; siguiente posicion del vector
+				add r1, #1				 
+				strb r1, [r0, r5] 	@; posicion de debajo(siguiente fila)
+				add r5, #1
+				strb r2, [r0, r5] 	@; la columna no varia
+				add r5, #1
+				add r1, #1			
+				strb r1, [r0, r5]	@; dos filas hacia abajo
+				b .Lfi_generar		@; ya ha generado el vector de posiciones
+		.Lsaltar_cori1_0:
+		cmp r3, #2 	@; comparamos c.ori=2
+		bne .Lsaltar_cori2_0 
+				sub r2, #1
+				add r5, #1
+				strb r2, [r0, r5]	@;columna de la izquierda
+				add r5, #1
+				strb r1, [r0, r5] 	@; fila no varia
+				add r5, #1
+				sub r2, #1			
+				strb r2, [r0, r5]	@; dos columnas a la izquierda
+				add r5, #1
+				strb r1, [r0, r5]  @; fila no varia
+				b .Lfi_generar
+		.Lsaltar_cori2_0:
+		cmp r3, #3 		@; comprovamos c.ori=3
+		bne .Lsaltar_cori3_0
+				add r5, #1
+				strb r2, [r0, r5]	@; col no varia
+				add r5, #1
+				sub r1, #1
+				strb r1, [r0, r5]	@; fila de arriba
+				add r5, #1
+				strb r2, [r0, r5]	@; col no varia
+				add r5, #1
+				sub r1, #1			
+				strb r1, [r0, r5]	@; fila dos arriba
+				b .Lfi_generar
+		.Lsaltar_cori3_0:
+		cmp r3, #5				@; comprovamos c.ori=5
+		bne .Lsaltar_cori5_0
+				add r5, #1
+				strb r2, [r0, r5]	@; col no varia
+				add r5, #1
+				sub r1, #1
+				strb r1, [r0, r5]	@; fila de arriba
+				add r5, #1
+				strb r2, [r0, r0]	@; col no varia
+				add r5, #1
+				add r1, #2
+				strb r1, [r0, r5]	@; fila de debajo de la original
+				b .Lfi_generar
+		.Lsaltar_cori5_0:
+		.Lsaltar_cpi0:
+		cmp r4, #1					@; comparar c.p.i=1, c.ori pot ser 0, 1, 3 o 5
+		bne .Lsaltar_cpi1
+			mov r5, #0				@; inicializamos vector de posiciones
+			sub r2, #1				
+			strb r2, [r0, r5]		@; guardamos posicion izquierda
+			add r5, #1
+			strb r1, [r0, r5]		@; fila no varia
+			add r2, #1				@; c++ para alinear los bloques
+			cmp r3, #0	@; comprovamos si c.ori=0
+			bne .Lsaltar_cori0_1
+				add r5, #1
+				add r2, #1
+				strb r2, [r0, r5]	@; posicion de la derecha
+				add r5, #1
+				strb r1, [r0, r5]	@; fila no varia
+				add r5, #1
+				add r2, #1
+				strb r2, [r0, r5]	@; posicion de dos a la derecha
+				add r5, #1
+				strb r1, [r0, r5]	@; fila no varia
+				b .Lfi_generar
+			.Lsaltar_cori0_1:
+			cmp r3, #1			@; comprovamos c.ori=1
+			bne .Lsaltar_cori1_1
+				add r5, #1
+				strb r2, [r0, r5]	@; col no varia
+				add r5, #1
+				add r1, #1
+				strb r1, [r0, r5]	@; fila de debajo
+				add r5, #1
+				strb r2, [r0, r5]	@; col no varia
+				add r5, #1
+				add r1, #1
+				strb r1, [r0, r5]	@; dos filas hacia abajo
+				b .Lfi_generar
+			.Lsaltar_cori1_1
+			cmp r3, #3				@; comprovamos c.ori=3
+			bne .Lsaltar_cori3_1
+				add r5, #1
+				strb r2, [r0, r5]	@; col no varia
+				add r5, #1
+				sub r1, #1
+				strb r1, [r0, r5]	@; fila de arriba
+				add r5, #1
+				strb r2, [r0, r5]	@; col no varia
+				add r5, #1
+				sub r1, #1
+				strb r1, [r0, r5]	@; dos filas hacia arriba
+				b .Lfi_generar
+			.Lsaltar_cori3_1:
+			cmp r3, #5				@; comprovamos si c.ori=5
+			bne .Lsaltar_cori5_1
+				add r5, #1
+				strb r2, [r0, r5]	@; col no varia
+				add r5, 1
+				sub r1, #1			
+				strb r1, [r0, r5]	@; fila de arriba
+				add r5, #1
+				strb r2, [r0, r5]	@; col no varia
+				add r5, #1
+				add r1, #2
+				strb r1, [r0, r5]	@; fila de debajo de la inicial
+				b .Lfi_generar
+		.Lsaltar_cori5_1:
+		.Lsaltar_cpi1:
+		cmp r4, #2				@; comparar c.p.i=2, c.ori pot ser 0, 2, 3 o 4			
+		bne .Lsaltar_cpi2
+			mov r5, #0			@; inicializamos vector de pos
+			strb r2, [r0, r5]	@; col no varia (x1)
+			add r5, #1
+			add r1, #1
+			strb r1, [r0, r5]	@; guardamos posicion de debajo (y1)
+			sub r1, #1			@; dejamos la fila donde estaba para dejar los bloques alineados
+			cmp r3, #0			@; comprovamos si c.ori=0
+			bne .Lsaltar_cori0_2	
+				add r5, #1
+				add r2, #1
+				strb r2, [r0, r5]	@; columna de la derecha
+				add r5, #1
+				strb r1, [r0, r5]	@; fila no varia
+				add r5 ,#1
+				add r2, 1
+				strb r2, [r0, r5]	@; columan de dos a la derecha
+				add r5, #1
+				strb r1, [r0, r5]	@; fila no varia
+				b .Lfi_generar
+			.Lsaltar_cori0_2:
+			cmp r3, #2				@; comprovamos si c.ori=2
+			bne .Lsaltar_cori2_2
+				add r5, #1
+				sub r2, #1
+				strb r2, [r0, r5]	@; columna de la izquierda
+				add r5, #1
+				strb r1, [r0, r5] 	@; fila no varia
+				add r5, #1
+				sub r2, #1
+				strb r2, [r0, r5]	@; dos columnas a la izquierda
+				add r5, #1
+				strb r1, [r0, r5]	@; fila no varia
+				b .Lfi_generar
+			.Lsaltar_cori2_2:
+			cmp r3, #3				@; comprovamos si c.ori=3
+			bne .Lsaltar_cori3_2
+				add r5, #1
+				strb r2, [r0, r5]	@; col no varia
+				add r5, #1
+				sub r1, #1
+				strb r1, [r0, r5]	@; fila de arriba
+				add r5, #1
+				strb r2, [r0, r5]	@; col no varia
+				add r5, #1
+				sub r1, #1
+				strb r1, [r0, r5]	@; dos filas hacia arriba
+				b .Lfi_generar
+			.Lsaltar_cori3_2:
+			cmp r3, #4				@; comprovamos c.ori=4
+			bne .Lsaltar_cori4_2
+				add r5, #1
+				sub r2, #1
+				strb r2, [r0, r5]	@; col de la izquierda
+				add r5, #1
+				strb r1, [r0, r5]	@; fila no varia
+				add r5, #1
+				add r2, #2
+				strb r2, [r0, r5]	@; col de la derecha a la inicial
+				add r5, #1
+				strb r1, [r0, r5]	@; fila no varia
+				b .Lfi_generar
+		.Lsaltar_cori4_2:
+		.Lsaltar_cpi2:
+		cmp r4, #3 				@; comparar c.p.i=3, c.ori pot ser 0, 1, 2 o 4
+		bne .Lsaltar_cpi3
+			mov r5, #0				@; inicializamos vector de pos
+			strb r2, [r0, r5]		@; col no varia
+			add r5, #1
+			sub r1, #1
+			strb r1, [r0, r5]		@; guardamos la fila de arriba
+			add r1, #1				@; volvemos a la fila para alinear los bloques
+			cmp r3, #0				@; comprovamos si c.ori = 0
+			bne .Lsaltar_cori0_3
+				add r5, #1
+				add r2, #1
+				strb r2, [r0, r5]	@; col de la derecha
+				add r5, #1
+				strb r1, [r0, r5]	@; fila no varia
+				add r5, #1
+				add r2, #1
+				strb r2, [r0, r5]	@; dos columnas a la derecha
+				add r5, #1
+				strb r1, [r0, r5]	@; fila no varia
+				b .Lfi_generar
+			.Lsaltar_cori0_3:
+			cmp r3, #1				@; comprovamos si c.ori=1
+			bne .Lsaltar_cori1_3
+				add r5, #1
+				strb r2, [r0, r5]	@; col no varia
+				add r5, #1
+				add r1, #1
+				strb r1, [r0, r5]	@; fila de debajo
+				add r5, #1
+				strb r2, [r0, r5]	@; col no varia
+				add r5, #1
+				add r1, #1
+				strb r1, [r0, r5]	@; dos filas hacia abajo
+				b .Lfi_generar
+			.Lsaltar_cori1_3:
+			cmp r3, #2				@; comprovamos c.ori=2
+			bne .Lsaltar_cori2_3
+				add r5, #1
+				sub r2, #1
+				strb r2, [r0, r5]	@; columna de la izquierda
+				add r5, #1
+				strb r1, [r0, r5]	@; fila no varia
+				add r5, #1
+				sub r2, #1
+				strb r2, [r0, r5]	@; dos columnas a la izquierda
+				add r5, #1
+				strb r1, [r0, r5]	@; fila no varia
+				b .Lfi_generar
+			.Lsaltar_cori2_3:
+			cmp r3, #4			@; comprovamos c.ori=4
+			bne .Lsaltar_cori4_3
+				add r5, #1
+				sub r2, #1
+				strb r2, [r0, r5]	@; columna de la izquierda
+				add r5, #1
+				strb r1, [r0, r5]	@; fila no varia
+				add r5, #1
+				add r2, #2
+				strb r2, [r0, r5]	@; columna de la derecha de la inicial
+				add r5, #1
+				strb r1, [r0, r5]	@; fila no varia
+				b. Lfi_generar
+			.Lsaltar_cori4_3:
+		.Lsaltar_cpi3:
+		Lfi_generar:
+			
+		pop {r1-r5, pc}
 
 
 
