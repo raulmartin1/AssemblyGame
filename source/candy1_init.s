@@ -59,13 +59,15 @@ inicializa_matriz:
 		mov r2, #0					@;inicializamos r2 y la usamos como contador para inicializar las columnas porque mas adelante la funcion cuenta_repeticiones exige que sea este registro
 		
 	.Lnumero_columna:
-		ldrb r5, [r7, r6]			
-		cmp r5, #0					
-		beq	.Lbucle_random			@;si detectamos que la casilla esta vacia saltamos al bucle random para poner un elemento basico 
-		cmp r5, #8					
-		beq .Lbucle_random			@;si detectamos que hay una gelatina simple vacia saltamos al bucle random para poner un elemento de gelatina simple
-		cmp r5, #16					
-		beq .Lbucle_random			@;si detectamos que hay una gelatina doble vacia saltamos al bucle random para poner un elemento de gelatina doble
+		ldrb r5, [r7, r6]	
+									@;cmp r5, #0					
+									@;beq	.Lbucle_random			@;si detectamos que la casilla esta vacia saltamos al bucle random para poner un elemento basico 
+									@;cmp r5, #8					
+									@;beq .Lbucle_random			@;si detectamos que hay una gelatina simple vacia saltamos al bucle random para poner un elemento de gelatina simple
+									@;cmp r5, #16					
+									@;beq .Lbucle_random			@;si detectamos que hay una gelatina doble vacia saltamos al bucle random para poner un elemento de gelatina doble
+		tst r5, #0x07
+		beq .Lbucle_random
 		strb r5, [r8, r6]			@;si es un bloque solido o un hueco lo copiamos y passem a la siguiente casilla
 		b .Lfinal					
 		
@@ -121,7 +123,7 @@ inicializa_matriz:
 	.global recombina_elementos
 recombina_elementos:
 
-		push {r0-r12, lr}
+		@;push {r0-r12, lr}
 		
 		mov r4, r0					@;pasamos a r4 la direccion base de la matriz de juego porque r0 la tendremos que usar mas adelante
 		ldr r7, =mat_recomb1		
@@ -329,6 +331,7 @@ recombina_elementos:
 		add r1, #1					@;avanza fila
 		cmp r1, #ROWS				
 		blo .Lnumero_filas_mfinal		@;si no esta en el final avanza al siguiente elemento
+		
 		
 		pop {r0-r12, pc}
 
