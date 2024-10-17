@@ -28,11 +28,11 @@
 @;		R0 = 1 si hay una secuencia, 0 en otro caso
 	.global hay_combinacion
 hay_combinacion:
-		push {r1-r9, lr}
+		push {r1-r12, lr}
 		mov r3, r0 @; guardamos direccion base matriz en r3
 		mov r1, #0 @; inicializar fila=0
 		mov r2, #0 @; inizializar col=0
-		mov r0, #0 @; si "hay combinacion" se inicializa a 0
+		mov r0, #6 @; inicializamos r0=6(sin secuencia)
 	
 		.Lrecorrer_filas: @; comprovar combinacion a la derecha
 		cmp r1, #ROWS
@@ -43,8 +43,8 @@ hay_combinacion:
 		bge .Lfin_columnas
 		
 		mov r4, #COLUMNS @;Encontramos la posicion de la matriz 
-		mul r5, r1, r4	 @; r3= fila*COLUMNS
-		add r5, r2	     @; r3= (fila*COLUMNS)+columna
+		mul r5, r1, r4	 @; r5= fila*COLUMNS
+		add r5, r2	     @; r5= (fila*COLUMNS)+columna
 		ldrb r6, [r3, r5] @; matriu[i][j], gelatina actual
 		
 		cmp r6, #0 		  @; Comprobar si no es un espacio vacio (0, 8, 16), un bloque solido (7) o un hueco (15)
@@ -107,8 +107,8 @@ hay_combinacion:
 		.Lrecorrer_columnas2:
 		cmp r2, #COLUMNS
 		bge .Lfin_columnas2
-		mul r5, r1, r4  @; r3= fila*COLUMNS
-		add r5, r2	     @; r3= (fila*COLUMNS)+columna
+		mul r5, r1, r4  @; r5= fila*COLUMNS
+		add r5, r2	     @; r5= (fila*COLUMNS)+columna
 		ldrb r6, [r3, r5] @; matriu[i][j], gelatina actual 
 		cmp r6, #0
 		beq .Lsaltar_posicion2
@@ -185,7 +185,7 @@ hay_combinacion:
 		.Lcomb_trobada:
 		mov r0, #1		@; si r0!=6 -> r0=1 hay combinacion
 		.Lfinal:
-		pop {r1-r9, pc}
+		pop {r1-r12, pc}
 
 
 @;TAREA 1H;

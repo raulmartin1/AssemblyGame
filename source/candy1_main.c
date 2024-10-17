@@ -458,6 +458,7 @@ int main(void)
 		escribe_matriz_testing(matrix);
 		if (hay_combinacion(matrix))			// si hay combinaciones
 			printf("\x1b[39m\x1b[3;0Hhay combinacion: SI");
+			
 		else
 			printf("\x1b[39m\x1b[3;0Hhay combinacion: NO");
 		retardo(3);
@@ -476,4 +477,3 @@ int main(void)
 	} while (1);
 	return(0);
 }
-
