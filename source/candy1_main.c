@@ -446,34 +446,60 @@ void procesa_sugerencia(char mat[][COLUMNS], unsigned short lap)
 /* ---------------------------------------------------------------- */
 int main(void)
 {
-	unsigned char level = 0;		// nivel del juego (nivel inicial = 0)
-	
-	consoleDemoInit();			// inicialización de pantalla de texto
-	printf("candyNDS (prueba tarea 1G)\n");
-	printf("\x1b[38m\x1b[1;0H  nivel: %d", level);
+    unsigned char level = 0;    // nivel del juego (nivel inicial = 0)
 
-	do							// bucle principal de pruebas
-	{
-		copia_matriz(matrix, mapas[level]);	// sustituye a inicializa_matriz()
-		escribe_matriz_testing(matrix);
-		if (hay_combinacion(matrix))			// si hay combinaciones
+    consoleDemoInit();          // Inicialización de pantalla de texto
+    printf("candyNDS (prueba tarea 1G)\n");
+    printf("\x1b[38m\x1b[1;0H  nivel: %d", level);
+
+    do                          // bucle principal de pruebas
+    {
+        copia_matriz(matrix, mapas[level]);    // Sustituye a inicializa_matriz()
+        escribe_matriz_testing(matrix);
+
+        if (hay_combinacion(matrix)){            // Si hay combinaciones
 			printf("\x1b[39m\x1b[3;0Hhay combinacion: SI");
-			
-		else
-			printf("\x1b[39m\x1b[3;0Hhay combinacion: NO");
-		retardo(3);
-		printf("\x1b[39m\x1b[3;19H (pulse A/B)");
-		do
-		{	swiWaitForVBlank();
-			scanKeys();					// esperar pulsación tecla 'A' o 'B'
-		} while (!(keysHeld() & (KEY_A | KEY_B)));
-		printf("\x1b[3;0H                               ");
-		retardo(3);
-		if (keysHeld() & KEY_A)			// si pulsa 'A',
-		{								// pasa a siguiente nivel
-			level = (level + 1) % MAXLEVEL;
-			printf("\x1b[38m\x1b[1;8H %d", level);
+        sugiere_combinacion(matrix, pos_sug);
+		printf("Sugerencia de combinacion: [%d, %d], [%d, %d], [%d, %d]\n",
+		pos_sug[0], pos_sug[1], pos_sug[2], pos_sug[3], pos_sug[4], pos_sug[5]);
+
+        // Parpadeo de elementos sugeridos
+        for (int reps = 0; reps < 5; reps++)    // Parpadea 5 veces
+        {
+            retardo(5);                         // Espera
+            oculta_elementos(matrix, pos_sug);  // Oculta los elementos sugeridos
+            escribe_matriz(matrix);             // Muestra matriz sin los elementos ocultos
+            retardo(5);                         // Espera
+            muestra_elementos(matrix, pos_sug); // Vuelve a mostrar los elementos sugeridos
+            escribe_matriz(matrix);             // Muestra matriz con los elementos visibles
+        }
+
+		
+		
+		}else{
+            printf("\x1b[39m\x1b[3;0Hhay combinacion: NO");
 		}
-	} while (1);
-	return(0);
+        // Llamamos a sugiere_combinacion para obtener sugerencia en 'pos_sug'
+     
+        retardo(3);
+        printf("\x1b[39m\x1b[3;19H (pulse A/B)");
+
+        do
+        {
+            swiWaitForVBlank();
+            scanKeys();                         // Esperar pulsación tecla 'A' o 'B'
+        } while (!(keysHeld() & (KEY_A | KEY_B)));
+
+        printf("\x1b[3;0H                               ");
+        retardo(3);
+
+        if (keysHeld() & KEY_A)                // Si pulsa 'A',
+        {                                      // Pasa al siguiente nivel
+            level = (level + 1) % MAXLEVEL;
+            printf("\x1b[38m\x1b[1;8H %d", level);
+        }
+
+    } while (1);
+
+    return(0);
 }

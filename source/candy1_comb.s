@@ -29,7 +29,7 @@
 	.global hay_combinacion
 hay_combinacion:
 		push {r1-r12, lr}
-		mov r3, r0 @; guardamos direccion base matriz en r3
+		mov r4, r0 @; guardamos direccion base matriz en r4 (para que entre en detecta_orientacion)
 		mov r1, #0 @; inicializar fila=0
 		mov r2, #0 @; inizializar col=0
 		mov r0, #6 @; inicializamos r0=6(sin secuencia)
@@ -42,10 +42,10 @@ hay_combinacion:
 		cmp r2, #COLUMNS-1 @; si col>=COLUMNS-1 salta al final del bucle
 		bge .Lfin_columnas
 		
-		mov r4, #COLUMNS @;Encontramos la posicion de la matriz 
-		mul r5, r1, r4	 @; r5= fila*COLUMNS
+		mov r3, #COLUMNS @;Encontramos la posicion de la matriz 
+		mul r5, r1, r3	 @; r5= fila*COLUMNS
 		add r5, r2	     @; r5= (fila*COLUMNS)+columna
-		ldrb r6, [r3, r5] @; matriu[i][j], gelatina actual
+		ldrb r6, [r4, r5] @; matriu[i][j], gelatina actual
 		
 		cmp r6, #0 		  @; Comprobar si no es un espacio vacio (0, 8, 16), un bloque solido (7) o un hueco (15)
 		beq .Lsaltar_posicion
@@ -58,7 +58,7 @@ hay_combinacion:
 		cmp r6, #15						
 		beq .Lsaltar_posicion
 		add r5, #1		@; Sumamos una posicion a la derecha
-		ldrb r7, [r3, r5] 	@; cargar la gelatina de la derecha en r7
+		ldrb r7, [r4, r5] 	@; cargar la gelatina de la derecha en r7
 		cmp r7, #0 		  @; Comprobar si no es un espacio vacio (0, 8, 16), un bloque solido (7) o un hueco (15)
 		beq .Lsaltar_posicion
 		cmp r7, #8						
@@ -73,9 +73,9 @@ hay_combinacion:
 		and r9, r7, #0x07 @; r9= mascara de la gelatina de la dreta
 		cmp r8, r9	@; comaparem si son iguals no intercanvien posicio
 		beq .LgelatinaIgualH @; si gelatina de la derecha igual salta
-		strb r6, [r3, r5]	@; guardem la gelatina de la actual en la dreta
+		strb r6, [r4, r5]	@; guardem la gelatina de la actual en la dreta
 		sub r5, #1			@; obtenemos la posicion original de la que se ha movido
-		strb r7, [r3, r5]	@; la gelatina de la derecha en la poscion que era de la actual
+		strb r7, [r4, r5]	@; la gelatina de la derecha en la poscion que era de la actual
 		
 		.LgelatinaIgualH:	@;gelatinas iguales Horizontales
 		bl detecta_orientacion
@@ -88,9 +88,9 @@ hay_combinacion:
 		bne .Lhay_combinacionH
 		cmp r8, r9
 		beq .Lsaltar_posicion
-		strb r6, [r3,r5]	@; tornem a colocar la gelatina actual en la seva posicio original
+		strb r6, [r4,r5]	@; tornem a colocar la gelatina actual en la seva posicio original
 		add r5, #1
-		strb r7, [r3, r5]	@; la gelatina de la dreta en la seva posicio original
+		strb r7, [r4, r5]	@; la gelatina de la dreta en la seva posicio original
 		.Lsaltar_posicion:
 		add r2, #1			@; col++
 		b .Lrecorrer_columnas	@;seguent columna
@@ -107,9 +107,9 @@ hay_combinacion:
 		.Lrecorrer_columnas2:
 		cmp r2, #COLUMNS
 		bge .Lfin_columnas2
-		mul r5, r1, r4  @; r5= fila*COLUMNS
+		mul r5, r1, r3  @; r5= fila*COLUMNS
 		add r5, r2	     @; r5= (fila*COLUMNS)+columna
-		ldrb r6, [r3, r5] @; matriu[i][j], gelatina actual 
+		ldrb r6, [r4, r5] @; matriu[i][j], gelatina actual 
 		cmp r6, #0
 		beq .Lsaltar_posicion2
 		cmp r6, #8						
@@ -120,8 +120,8 @@ hay_combinacion:
 		beq .Lsaltar_posicion2
 		cmp r6, #15						
 		beq .Lsaltar_posicion2
-		add r5, r4		@; r5 = r5+COLUMNS, bajamos una posicion (siguiente fila)
-		ldrb r7, [r3, r5] 	@; cargar la gelatina de debajo en r7
+		add r5, r3		@; r5 = r5+COLUMNS, bajamos una posicion (siguiente fila)
+		ldrb r7, [r4, r5] 	@; cargar la gelatina de debajo en r7
 		cmp r7, #0 		  @; Comprobar si no es un espacio vacio (0, 8, 16), un bloque solido (7) o un hueco (15)
 		beq .Lsaltar_posicion2
 		cmp r7, #8						
@@ -136,9 +136,9 @@ hay_combinacion:
 		and r9, r7, #0x07 @; r9= mascara de la gelatina de debajo
 		cmp r8, r9		@; comaparem si son iguals no intercanvien posicio
 		beq .LgelatinaIgualV
-		strb r6, [r3, r5] @; gelatina actual al lloc de la de sota
-		sub r5, r4		  @; restem una COLUMNS per pujar una fila
-		strb r7, [r3, r5] @; gelatina de sota al lloc de la actual
+		strb r6, [r4, r5] @; gelatina actual al lloc de la de sota
+		sub r5, r3		  @; restem una COLUMNS per pujar una fila
+		strb r7, [r4, r5] @; gelatina de sota al lloc de la actual
 		
 		.LgelatinaIgualV:
 		bl detecta_orientacion	@;comprova si hay combinacion en la posicion de la actual
@@ -151,9 +151,9 @@ hay_combinacion:
 		bne .Lhay_combinacionV
 		cmp r8, r9
 		beq .Lsaltar_posicion2	@; si no eran iguals tornem a colocarlas al lloc original
-		strb r6, [r3, r5]		@; gelatina actual al seu lloc	
-		add r5, r4
-		strb r7, [r3, r5]		@; gelatina de sota al seu lloc
+		strb r6, [r4, r5]		@; gelatina actual al seu lloc	
+		add r5, r3
+		strb r7, [r4, r5]		@; gelatina de sota al seu lloc
 		.Lsaltar_posicion2:
 		add r2, #1				@; c++ seguent columna
 		b .Lrecorrer_columnas2
@@ -165,16 +165,16 @@ hay_combinacion:
 		.Lhay_combinacionH:	@;coloquem les gelatines al seu lloc original en cas de combinacio trobada horitzontal
 		cmp r8, r9
 		beq .Lsaltar_final 
-		strb r6, [r3, r5]
+		strb r6, [r4, r5]
 		add r5, #1
-		strb r7, [r3, r5]
+		strb r7, [r4, r5]
 		b .Lsaltar_final
 		.Lhay_combinacionV: @; coloquem les gelatines al seu lloc origina en cas de combinacion trobada vertical
 		cmp r8, r9
 		beq .Lsaltar_final 
-		strb r6, [r3, r5]
-		add r5, r4
-		strb r7, [r3, r5]
+		strb r6, [r4, r5]
+		add r5, r3
+		strb r7, [r4, r5]
 		
 		.Lsaltar_final:
 		cmp r0, #6
@@ -208,17 +208,19 @@ hay_combinacion:
 	.global sugiere_combinacion
 sugiere_combinacion:
 		push {r2-r12, lr}
-		mov r3, r0	@; guaradamos direccion base de la matriz de juego
-		mov r5, r1	@; guardamos direccion vector de posiciones
+		mov r4, r0	@; guaradamos direccion base de la matriz de juego
+		mov r6, r1	@; guardamos direccion vector de posiciones
 		
 		bl hay_combinacion
 		cmp r0, #0
 		beq .Lfin			@; si no hay combinacion salta al final del metodo
 		mov r1, #0			@; inicializamos fila
 		mov r2, #0			@; inicalizamos cols
-		mov r4, #0			@; inicializamos posicion de la gelatina
-		mov r6, #0			@; inicializamos c.p.i a 0
-		mov r7, #6			@; inicializamos c.ori a 6 (sin secuencia)
+		mov r3, #6			@; c.ori a 6 (sin secuencia)
+		mov r5, #0			@; inicializamos c.p.i a 0
+		
+		mov r7, #0			@; inicializamos posicion de la gelatina
+		
 		mov r8, #COLUMNS
 		
 		mov r0, #ROWS		@; ROWS A r0 ya que es valor de entrada a mod_random
@@ -237,9 +239,9 @@ sugiere_combinacion:
 			.Lrecorrer_sugerenciac:
 			cmp r2, #COLUMNS
 			bge .Lno_sugerenciac @; encontrar posicion actual
-			mul r4, r1, r8		@; r4= fila*COLUMNS
-			add r4, r2	     	@; r4= (fila*COLUMNS)+columna
-			ldrb r9, [r3, r4] 	@; r9= matriu[i][j], gelatina actual
+			mul r7, r1, r8		@; r4= fila*COLUMNS
+			add r7, r2	     	@; r4= (fila*COLUMNS)+columna
+			ldrb r9, [r4, r7] 	@; r9= matriu[i][j], gelatina actual
 			cmp r9, #0			@; comprobar si hay un bloque especial
 			beq .Lhay_bloqueador			
 			cmp r9, #8					
@@ -252,8 +254,8 @@ sugiere_combinacion:
 			beq .Lhay_bloqueador
 			cmp r1, #0						@; miramos que no este en la primera fila
 			beq .Lsaltar_comprovar_vector1	@; ==COMPROBACION COMB HACIA ARRIBA==
-				sub r4, r8					@; subimos una posicion
-				ldrb r10, [r3, r4]			@; valor gelatina de dalt
+				sub r7, r8					@; subimos una posicion
+				ldrb r10, [r4, r7]			@; valor gelatina de dalt
 				cmp r10, #0					@; comprobar si hay un bloque especial
 				beq .Lsaltar_sugerencia1			
 				cmp r10, #8					
@@ -268,29 +270,29 @@ sugiere_combinacion:
 				and r12, r10, #0x07	@; r12 = mascara de la gelatina de arriba
 				cmp r11, r12
 				beq .Lgelatinas_iguales1	@; Si son iguales no intercambiaremos sus posiciones
-				strb r9, [r3, r4]			@; intercambiamos posiciones
-				add r4, r8
-				strb r10, [r3, r4]
+				strb r9, [r4, r7]			@; intercambiamos posiciones
+				add r7, r8
+				strb r10, [r4, r7]
 				.Lgelatinas_iguales1:
 				bl detecta_orientacion	@; calculamos c.ori
-				mov r7, r0				@; guardamos c.ori en r7
-				mov r6, #3				@; c.p.i=3 (posicion inicial abajo)
+				mov r3, r0				@; guardamos c.ori en r7
+				mov r5, #3				@; c.p.i=3 (posicion inicial abajo)
 				cmp r11, r12
 				beq .Lsaltar_sugerencia1
-				strb r9, [r3, r4]			@; les coloquem en les seves posicions inicials
-				sub r4, r8
-				strb r10, [r3, r4]
+				strb r9, [r4, r7]			@; les coloquem en les seves posicions inicials
+				sub r7, r8
+				strb r10, [r4, r7]
 				.Lsaltar_sugerencia1:
-				cmp r7, #6
+				cmp r3, #6
 				bne .Lfi_sugiere		@; si (c.ori)r7!=6, saltar al final
 			.Lsaltar_comprovar_vector1:
 			cmp r1, #ROWS-1					@; que no este en la ultima fila
 			bge .Lsaltar_comprovar_vector2	@; ==COMPROBACION COMB HACIA ABAJO==
-				mul r4, r1, r8		@; r4= fila*COLUMNS
-				add r4, r2	     	@; r4= (fila*COLUMNS)+columna
-				ldrb r9, [r3, r4] 	@; r9= matriu[i][j], gelatina actual
-				add r4, r8
-				ldrb r10, [r3, r4]	@; r10= gelatina de sota
+				mul r7, r1, r8		@; r4= fila*COLUMNS
+				add r7, r2	     	@; r4= (fila*COLUMNS)+columna
+				ldrb r9, [r4, r7] 	@; r9= matriu[i][j], gelatina actual
+				add r7, r8
+				ldrb r10, [r4, r7]	@; r10= gelatina de sota
 				cmp r10, #0					@; comprobar si hay un bloque especial
 				beq .Lsaltar_sugerencia2			
 				cmp r10, #8					
@@ -305,29 +307,29 @@ sugiere_combinacion:
 				and r12, r10, #0x07	@; r12 = mascara de la gelatina de sota
 				cmp r11, r12
 				beq .Lgelatinas_iguales2
-				strb r9, [r3, r4]	@; gel actual en la posicio de la de sota
-				sub r4, r8			@; subimos una fila para intercambiarlo con el de arriba
-				strb r10, [r3, r4]	@; gelatina de debajo, la colocamos arriba
+				strb r9, [r4, r7]	@; gel actual en la posicio de la de sota
+				sub r7, r8			@; subimos una fila para intercambiarlo con el de arriba
+				strb r10, [r4, r7]	@; gelatina de debajo, la colocamos arriba
 				.Lgelatinas_iguales2:
 				bl detecta_orientacion @; calculamos c.ori
-				mov r7, r0				@; r7=c.ori
-				mov r6, #2				@; c.p.i=2 (posicion inicial arriba)
+				mov r3, r0				@; r7=c.ori
+				mov r5, #2				@; c.p.i=2 (posicion inicial arriba)
 				cmp r11, r12
 				beq .Lsaltar_sugerencia2 @; si no eran  iguales volvemos a cambiar sus posiciones		
-				strb r9, [r3, r4]	@; gel actual en su posicion original (encima)
-				add r4, r8			@; bajamos una fil, y colocamos la de abajo donde inicialmente
-				strb r10, [r3, r4]
+				strb r9, [r4, r7]	@; gel actual en su posicion original (encima)
+				add r7, r8			@; bajamos una fil, y colocamos la de abajo donde inicialmente
+				strb r10, [r4, r7]
 				.Lsaltar_sugerencia2:
-				cmp r7, #6
+				cmp r3, #6
 				bne .Lfi_sugiere	@; si (c.ori)r7!=6, saltar al final
 			.Lsaltar_comprovar_vector2:
 			cmp r2, #COLUMNS-1				@; que no este en la ultima columna
 			bge .Lsaltar_comprovar_vector3 @; ==COMPROBACION COMB HACIA DERECHA==
-				mul r4, r1, r8		@; r4= fila*COLUMNS
-				add r4, r2	     	@; r4= (fila*COLUMNS)+columna
-				ldrb r9, [r3, r4] 	@; r9= matriu[i][j], gelatina actual
-				add r4, #1
-				ldrb r10, [r3, r4]	@; r10= gelatina de dreta
+				mul r7, r1, r8		@; r4= fila*COLUMNS
+				add r7, r2	     	@; r4= (fila*COLUMNS)+columna
+				ldrb r9, [r4, r7] 	@; r9= matriu[i][j], gelatina actual
+				add r7, #1
+				ldrb r10, [r4, r7]	@; r10= gelatina de dreta
 				cmp r10, #0					@; comprobar si hay un bloque especial
 				beq .Lsaltar_sugerencia3			
 				cmp r10, #8					
@@ -342,29 +344,29 @@ sugiere_combinacion:
 				and r12, r10, #0x07	@; r12 = mascara de la gelatina de la dreta
 				cmp r11, r12
 				beq .Lgelatinas_iguales3
-				strb r9, [r3, r4]	@; gel actual en la posicion de la derecha
-				sub r4, #1			@; columna a la izquierda
-				strb r10, [r3, r4]	@; ponemos la gelatina de la derecha donde la actual
+				strb r9, [r4, r7]	@; gel actual en la posicion de la derecha
+				sub r7, #1			@; columna a la izquierda
+				strb r10, [r4, r7]	@; ponemos la gelatina de la derecha donde la actual
 				.Lgelatinas_iguales3:
 				bl detecta_orientacion	@; calculamos c.ori
-				mov r7, r0			@; r7=c.ori
-				mov r6, #0			@; c.p.i=0 (posicion inicial izquierda)	
+				mov r3, r0			@; r7=c.ori
+				mov r5, #0			@; c.p.i=0 (posicion inicial izquierda)	
 				cmp r11, r12
 				beq .Lsaltar_sugerencia3	@; si son iguales no intercambiamos
-				strb r9, [r3, r4]	@; gelatines a les seves posicions originals
-				add r4, #1	
-				strb r10, [r3, r4]
+				strb r9, [r4, r7]	@; gelatines a les seves posicions originals
+				add r7, #1	
+				strb r10, [r4, r7]
 				.Lsaltar_sugerencia3:
-				cmp r7, #6
+				cmp r3, #6
 				bne .Lfi_sugiere	@; si (c.ori)r7!=6, saltar al final
 			.Lsaltar_comprovar_vector3:
 			cmp r2, #0						@; que no este en la priemra columna
 			beq .Lsaltar_comprovar_vector4 @; ==COMPROBACION COMB HACIA IZQUIERDA==
-				mul r4, r1, r8		@; r4= fila*COLUMNS
-				add r4, r2	     	@; r4= (fila*COLUMNS)+columna
-				ldrb r9, [r3, r4] 	@; r9= matriu[i][j], gelatina actual
-				sub r4, #1
-				ldrb r10, [r3, r4]	@; r10= gelatina de esquerra
+				mul r7, r1, r8		@; r4= fila*COLUMNS
+				add r7, r2	     	@; r4= (fila*COLUMNS)+columna
+				ldrb r9, [r4, r7] 	@; r9= matriu[i][j], gelatina actual
+				sub r7, #1
+				ldrb r10, [r4, r7]	@; r10= gelatina de esquerra
 				cmp r10, #0					@; comprobar si hay un bloque especial
 				beq .Lsaltar_sugerencia4			
 				cmp r10, #8					
@@ -379,24 +381,24 @@ sugiere_combinacion:
 				and r12, r10, #0x07	@; r12 = mascara de la gelatina de la esquerra
 				cmp r11, r12
 				beq .Lgelatinas_iguales4 
-				strb r9, [r3, r4]	@; gel actual en la posicion de la izquierda
-				add r4, #1			@; columna a la izquierda
-				strb r10, [r3, r4]	@; ponemos la gelatina de la izquierda donde la actual
+				strb r9, [r4, r7]	@; gel actual en la posicion de la izquierda
+				add r7, #1			@; columna a la izquierda
+				strb r10, [r4, r7]	@; ponemos la gelatina de la izquierda donde la actual
 				.Lgelatinas_iguales4:
 				bl detecta_orientacion	@; calculamos c.ori
-				mov r7, r0				@; r7=c.ori
-				mov r6, #1				@; c.p.i=1 (posicion inicial dreta)	
+				mov r3, r0				@; r7=c.ori
+				mov r5, #1				@; c.p.i=1 (posicion inicial dreta)	
 				cmp r11, r12
 				beq .Lsaltar_sugerencia4	@; si no eran iguales volvemos a intercambiar posiciones
-				strb r9, [r3, r4]
-				sub r4, #1	
-				strb r10, [r3, r4]
+				strb r9, [r4, r7]
+				sub r7, #1	
+				strb r10, [r4, r7]
 				.Lsaltar_sugerencia4:
-				cmp r7, #6
+				cmp r3, #6
 				bne .Lfi_sugiere	@; si (c.ori)r7!=6, saltar al final
 			.Lsaltar_comprovar_vector4:
 			.Lhay_bloqueador:
-				cmp r7, #6				@; comprobar si se ha encontrado sug
+				cmp r3, #6				@; comprobar si se ha encontrado sug
 				bne .Lfi_sugiere
 				add r2, #1				@; col++, para mirar siguiente posicion
 			b .Lrecorrer_sugerenciac
@@ -405,16 +407,15 @@ sugiere_combinacion:
 				mov r2, #0
 		b .Lrecorrer_sugerenciaf
 		.Lfi_sugiere:
-		cmp r7, #6					@; llega al final de la matriz, si aun no ha encotrado comb-> volver punto inicial
+		cmp r3, #6					@; llega al final de la matriz, si aun no ha encotrado comb-> volver punto inicial
 		beq .Lpunt_inicial
-		mov r0, r5					@; recuperamos direccion vector de posiciones
+		mov r4, r5					@; r4= c.p.i para entrar a genera_posiciones
+		mov r0, r6					@; recuperamos direccion vector de posiciones
 		bl genera_posiciones		@; si ha encontrado la sugerencia-> genera las posiciones de sugerencia
 		.Lfin:
 				
 		pop {r2-r12, pc}
-
-
-
+		
 
 @;:::RUTINAS DE SOPORTE:::
 
@@ -438,15 +439,15 @@ sugiere_combinacion:
 @;	Resultado:
 @;		vector de posiciones (x1,y1,x2,y2,x3,y3), devuelto por referencia
 genera_posiciones:
-		push {r1-r5, lr}
+		push {r1-r12, lr}
 		cmp r4, #0	@; comparamos c.p.i=0 , c.ori pot ser 1,2,3 o 5
 		bne .Lsaltar_cpi0
-			add r2, #1 @; sumamos una columna, posicion de la derecha
 			mov r5, #0 @; inicializamos vector
+			add r2, #1 @; sumamos una columna, posicion de la derecha
 			strb r2, [r0, r5] @; guardamos de la derecha (x1=columna) 
-			sub r2, #1 @;vuelve a la columna inicial
 			add r5, #1			@; siguiente posicion del vector
 			strb r1, [r0, r5]   @; guardamos la fila inicial (y1=fila)
+			sub r2, #1 
 			cmp r3, #1			@; comprovamos c.ori=1
 			bne .Lsaltar_cori1_0
 				add r5, #1			@; siguiente posicion del vector
@@ -701,9 +702,8 @@ genera_posiciones:
 		.Lsaltar_cpi3:
 		.Lfi_generar:
 			
-		pop {r1-r5, pc}
-
-
+		pop {r1-r12, pc}
+		
 
 @; detecta_orientacion(f, c, mat): devuelve el código de la primera orientación
 @;	en la que detecta una secuencia de 3 o más repeticiones del elemento de la
