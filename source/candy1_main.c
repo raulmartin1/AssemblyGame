@@ -457,15 +457,15 @@ void procesa_sugerencia(char mat[][COLUMNS], unsigned short lap)
 
 
 #define NUMTESTS_CR 19 // Número total de pruebas cuenta repeticiones
-#define NUMTESTS_BE 6  // Número total de pruebas baja elementos
+#define NUMTESTS_BE 7  // Número total de pruebas baja elementos
 
-short nmap_cr[] = 	{4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 8,  9, 10, 11, 11, 12}; // Mapas
+short nmap_cr[] = 	{4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 8,  9, 10, 11, 11, 12}; // Mapas cuenta repeticiones
 short posX[] = 		{0, 0, 0, 0, 4, 4, 4, 0, 0, 5, 4, 1, 1, 1,  2, 2, 4, 4, 1}; // Coordenadas X
 short posY[] = 		{2, 2, 2, 2, 4, 4, 4, 0, 0, 0, 4, 3, 3, 5,  2, 2, 4, 4, 0}; // Coordenadas Y
 short cori[] = 		{0, 1, 2, 3, 0, 1, 2, 0, 3, 0, 0, 1, 3, 0,  0, 2, 0, 2, 0}; // Orientaciones
 short resp[] = 		{1, 2, 1, 1, 2, 1, 1, 3, 1, 3, 5, 2, 4, 2,  3, 1, 3, 1, 5}; // Resultados esperados
 
-short nmap_be[]= {2,3,4,13,14,15};
+short nmap_be[]= {2,3,4,13,14,15,16};	//Mapas de baja elementos
 
 int main(void)
 {
@@ -528,7 +528,7 @@ int main(void)
 	else if ((keysHeld() & KEY_B))
 		{
 		ntest=0;
-		int mov_ralitzat=true;
+		int mov_realitzat=true;
 		consoleDemoInit();			// inicialización de pantalla de texto
 		printf("candyNDS (prueba tarea 1F)\n");
 		printf("\x1b[38m\x1b[1;0H  nivel:");
