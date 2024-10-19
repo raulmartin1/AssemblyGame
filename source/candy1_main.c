@@ -243,6 +243,9 @@ void inicializa_nivel(char mat[][COLUMNS], unsigned char lev,
 	y, en caso de que se genere alguna secuencia, decrementa el número de
 	movimientos y retorna un código diferente de cero.
 */
+
+
+
 unsigned char procesa_pulsacion(char mat[][COLUMNS], 
 							short p, unsigned char *m, unsigned char g)
 {
@@ -275,6 +278,10 @@ unsigned char procesa_pulsacion(char mat[][COLUMNS],
 	}
 	return(result);
 }
+
+
+
+
 
 
 #ifdef TRUCOS
@@ -443,25 +450,43 @@ void procesa_sugerencia(char mat[][COLUMNS], unsigned short lap)
 
 
 
+
 /* ---------------------------------------------------------------- */
 /* candy1_main.c : función principal main() para test de tarea 1E 	*/
 /* ---------------------------------------------------------------- */
-#define NUMTESTS 14
-short nmap[] = {4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 8};
-short posX[] = {0, 0, 0, 0, 4, 4, 4, 0, 0, 5, 4, 1, 1, 1};
-short posY[] = {2, 2, 2, 2, 4, 4, 4, 0, 0, 0, 4, 3, 3, 5};
-short cori[] = {0, 1, 2, 3, 0, 1, 2, 0, 3, 0, 0, 1, 3, 0};
-short resp[] = {1, 2, 1, 1, 2, 1, 1, 3, 1, 3, 5, 2, 4, 2};
+
+
+#define NUMTESTS_CR 19 // Número total de pruebas cuenta repeticiones
+#define NUMTESTS_BE 6  // Número total de pruebas baja elementos
+
+short nmap_cr[] = 	{4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 8,  9, 10, 11, 11, 12}; // Mapas
+short posX[] = 		{0, 0, 0, 0, 4, 4, 4, 0, 0, 5, 4, 1, 1, 1,  2, 2, 4, 4, 1}; // Coordenadas X
+short posY[] = 		{2, 2, 2, 2, 4, 4, 4, 0, 0, 0, 4, 3, 3, 5,  2, 2, 4, 4, 0}; // Coordenadas Y
+short cori[] = 		{0, 1, 2, 3, 0, 1, 2, 0, 3, 0, 0, 1, 3, 0,  0, 2, 0, 2, 0}; // Orientaciones
+short resp[] = 		{1, 2, 1, 1, 2, 1, 1, 3, 1, 3, 5, 2, 4, 2,  3, 1, 3, 1, 5}; // Resultados esperados
+
+short nmap_be[]= {2,3,4,13,14,15};
 
 int main(void)
 {
 	unsigned char level;			// nivel del juego
 	unsigned char ntest = 0;		// número de test
 	unsigned char result;			// resultado de cuenta_repeticiones()
-
+	int mov_realitzat = true;
 	consoleDemoInit();			// inicialización de pantalla de texto
 	printf("candyNDS (prueba tarea 1E)\n");
-	level = nmap[0];
+	
+	printf("candyNDS Pulsa:\nA para cuenta_repeticiones\nB para baja_elementos");
+	do{
+		swiWaitForVBlank();
+		scanKeys();
+	} while(!(keysHeld() & (KEY_A | KEY_B)));
+	
+	if ((keysHeld() & KEY_A))
+	{
+	
+	printf("candyNDS (prueba tarea 1E)\n");
+	level = nmap_cr[0];
 	printf("\x1b[38m\x1b[1;0H  nivel: %d", level);
 	copia_matriz(matrix, mapas[level]);
 	escribe_matriz_testing(matrix);
@@ -488,17 +513,74 @@ int main(void)
 		if (keysHeld() & KEY_A)		// si pulsa 'A',
 		{
 			ntest++;				// siguiente test
-			if ((ntest < NUMTESTS) && (nmap[ntest] != level))
+			if ((ntest < NUMTESTS_CR) && (nmap_cr[ntest] != level))
 			{				// si número de mapa del siguiente test diferente
-				level = nmap[ntest];		// del número de mapa actual,
+				level = nmap_cr[ntest];		// del número de mapa actual,
 				printf("\x1b[38m\x1b[1;8H %d", level); // cambiar el mapa actual
 				copia_matriz(matrix, mapas[level]);
 				escribe_matriz_testing(matrix);
 			}
 		}
-	} while (ntest < NUMTESTS);		// bucle de pruebas
+	} while (ntest < NUMTESTS_CR);		// bucle de pruebas
 	printf("\x1b[38m\x1b[5;19H (fin tests)");
+	
+	}
+	else if ((keysHeld() & KEY_B))
+		{
+		ntest=0;
+		int mov_ralitzat=true;
+		consoleDemoInit();			// inicialización de pantalla de texto
+		printf("candyNDS (prueba tarea 1F)\n");
+		printf("\x1b[38m\x1b[1;0H  nivel:");
+		level = nmap_be[0];
+		copia_matriz(matrix, mapas[level]);
+		escribe_matriz(matrix);
+		
+		do
+		{
+		printf("\x1b[39m\x1b[2;0H test %d: ", ntest);
+			
+			do{
+			escribe_matriz(matrix);
+			mov_realitzat = baja_elementos(matrix);
+			retardo(10);
+			}while (mov_realitzat);
+			
+			escribe_matriz(matrix);
+				
+			retardo(5);
+			printf("\x1b[38m\x1b[5;19H (pulse A/B)");
+			do
+			{	swiWaitForVBlank();
+				scanKeys();					// esperar pulsación tecla 'A' o 'B'
+			} while (!(keysHeld() & (KEY_A | KEY_B)));
+			printf("\x1b[2;0H                               ");
+			printf("\x1b[3;0H                               ");
+			printf("\x1b[4;0H                               ");
+			printf("\x1b[38m\x1b[5;19H            ");
+			retardo(5);
+			if (keysHeld() & KEY_A)		// si pulsa 'A',
+			{
+				ntest++;				// siguiente test
+				if ((ntest < NUMTESTS_BE) && (nmap_be[ntest] != level))
+				{				// si número de mapa del siguiente test diferente
+					level = nmap_be[ntest];		// del número de mapa actual,
+												// cambiar el mapa actual
+					copia_matriz(matrix, mapas[level]);
+					escribe_matriz(matrix);
+				}
+			}
+			else if (keysHeld() & KEY_B)
+			{
+				if (ntest != 0) ntest--;
+				level = nmap_be[ntest];
+				
+				copia_matriz(matrix, mapas[level]);
+				escribe_matriz(matrix);
+			}
+		} while (ntest < NUMTESTS_BE);		// bucle de pruebas
+		printf("\x1b[38m\x1b[5;5H (fin tests baja_elementos)");
+	}
 	do { swiWaitForVBlank(); } while(1);	// bucle infinito
 	return(0);
 }
-

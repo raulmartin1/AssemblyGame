@@ -40,7 +40,7 @@
 	mapas:
 
 	@; mapa 0: todo aleatorio
-		.byte 0,0,0,0,0,0,0,0,0
+		.byte 3,3,3,4,4,4,6,6,6
 		.byte 0,0,0,0,0,0,0,0,0
 		.byte 0,0,0,0,0,0,0,0,0
 		.byte 0,0,0,0,0,0,0,0,0
@@ -139,9 +139,81 @@
 		.byte 7,7,17,19,4,6,15,15,15
 
 
-	@; etc.
+	@; Mapa 9: Combinaciones horizontales con gelatinas y bloques sólidos
+    .byte 1, 1, 9, 7, 2, 2, 10, 7, 3
+    .byte 0, 0, 0, 7, 0, 0, 0, 7, 0
+    .byte 3, 11, 3, 19, 3, 7, 4, 8, 5
+    .byte 0, 0, 0, 0, 16, 0, 0, 0, 7
+    .byte 1, 2, 2, 7, 2, 2, 2, 7, 0
+    .byte 0, 0, 0, 7, 0, 0, 0, 7, 0
+    .byte 4, 4, 4, 7, 4, 4, 4, 7, 5
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
+    .byte 7, 7, 7, 7, 7, 7, 7, 7, 7
+
+@; Mapa 10: Combinaciones verticales y horizontales, con gelatina doble
+    .byte 2, 2, 2, 0, 0, 0, 0, 0, 0
+    .byte 3, 3, 3, 7, 0, 0, 0, 0, 0
+    .byte 1, 16, 1, 7, 1, 0, 1, 0, 1
+    .byte 0, 0, 0, 7, 0, 0, 0, 0, 0
+    .byte 4, 4, 4, 7, 4, 4, 4, 7, 0
+    .byte 0, 0, 0, 7, 0, 0, 0, 7, 0
+    .byte 5, 5, 5, 7, 5, 5, 5, 7, 0
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
+    .byte 7, 7, 7, 7, 7, 7, 7, 7, 7
+
+@; Mapa 11: Combinaciones interrumpidas
+    .byte 3, 11, 3, 0, 0, 0, 0, 0, 7
+    .byte 0, 0, 7, 2, 2, 2, 0, 0, 7
+    .byte 1, 16, 1, 7, 0, 0, 1, 0, 1
+    .byte 0, 0, 0, 7, 0, 0, 0, 0, 0
+    .byte 4, 4, 4, 7, 4, 4, 4, 7, 0
+    .byte 0, 0, 0, 7, 0, 0, 0, 7, 0
+    .byte 5, 5, 5, 7, 5, 5, 5, 7, 0
+    .byte 7, 7, 7, 7, 7, 7, 7, 7, 7
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+@; Mapa 12: Gelatina doble con combinaciones horizontales y verticales
+    .byte 16, 2, 2, 2, 10, 2, 7, 0, 0
+    .byte 0, 0, 0, 7, 0, 0, 0, 0, 0
+    .byte 4, 4, 4, 0, 0, 0, 0, 0, 7
+    .byte 7, 0, 0, 0, 7, 0, 0, 0, 7
+    .byte 5, 5, 5, 0, 0, 0, 0, 7, 7
+    .byte 7, 0, 0, 0, 0, 0, 0, 0, 0
+    .byte 1, 1, 1, 0, 0, 0, 0, 0, 0
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
+    .byte 7, 7, 7, 7, 7, 7, 7, 7, 7
+
+@; Mapa 13: Mezcla avanzada con gelatina, bloques y combinaciones
+    .byte 5, 5, 5, 0, 16, 0, 0, 0, 7
+    .byte 0, 0, 0, 0, 7, 0, 0, 0, 0
+    .byte 3, 11, 3, 0, 0, 8, 0, 8, 3
+    .byte 0, 0, 0, 0, 16, 0, 0, 0, 7
+    .byte 4, 4, 4, 7, 0, 0, 0, 7, 0
+    .byte 7, 0, 0, 0, 7, 0, 0, 0, 7
+    .byte 6, 6, 6, 7, 6, 6, 6, 7, 0
+    .byte 7, 7, 7, 7, 7, 7, 7, 7, 7
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 
+@; Mapa 14: Paredes para bajar diagonal
+    .byte 7, 0, 0, 0, 7, 0, 0, 4, 7    
+	.byte 0, 7, 0, 0, 7, 0, 0, 7, 0
+	.byte 0, 3, 7, 0, 7, 3, 7, 0, 0    
+	.byte 0, 0, 4, 7, 7, 7, 0, 0, 0    
+	.byte 0, 0, 0, 0, 7, 0, 0, 0, 0
+	.byte 0, 2, 0, 0, 0, 0, 2, 0, 0    
+	.byte 3, 0, 0, 0, 0, 0, 0, 0, 0
+	.byte 0, 0, 0, 0, 0, 0, 0, 0, 0
+	.byte 7, 7, 7, 7, 7, 7, 7, 7, 7 
 
-.end
-	
+
+@; Mapa 15: Paredes para bajar diagonal y vertical un poco mas dificil
+    .byte 7, 0, 7, 0, 7, 7, 7, 0, 7    
+	.byte 7, 0, 0, 0, 15, 0, 0, 0, 7
+	.byte 7, 0, 0, 0, 15, 3, 7, 0, 7    
+	.byte 7, 0, 0, 0, 15, 0, 7, 0, 7    
+	.byte 7, 0, 0, 0, 15, 0, 0, 0, 0
+	.byte 7, 7, 0, 0, 15, 0, 0, 0, 0    
+	.byte 7, 7, 7, 0, 0, 0, 15, 0, 15
+	.byte 7, 7, 7, 7, 0, 0, 0, 0, 0
+	.byte 15, 15, 15, 7, 7, 7, 7, 7, 7    
