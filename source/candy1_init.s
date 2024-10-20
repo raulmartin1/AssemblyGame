@@ -294,7 +294,7 @@ recombina_elementos:
 		mov r2, r1					@;r2=fila desti
 		mov r11, r1					@;guardamos valor filas en r11
 		mov r1, r12					@;r1=columna origen
-		@; bl activa_elemento
+		@;bl activa_elemento
 		mov r2, r10					@;recuperem el valor de l'index de columnes
 		mov r1, r11					@;recuperem el valor de l'index de files
 	.Lfinal_recombinacio:
