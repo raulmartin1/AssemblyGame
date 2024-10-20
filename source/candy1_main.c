@@ -464,12 +464,12 @@ int main(void)
 		pos_sug[0], pos_sug[1], pos_sug[2], pos_sug[3], pos_sug[4], pos_sug[5]);
 
         // Parpadeo de elementos sugeridos
-        for (int reps = 0; reps < 5; reps++)    // Parpadea 5 veces
+        for (int reps = 0; reps < 2; reps++)    // Parpadea 2 veces
         {
-            retardo(5);                         // Espera
+            retardo(2);                         // Espera
             oculta_elementos(matrix, pos_sug);  // Oculta los elementos sugeridos
             escribe_matriz(matrix);             // Muestra matriz sin los elementos ocultos
-            retardo(5);                         // Espera
+            retardo(2);                         // Espera
             muestra_elementos(matrix, pos_sug); // Vuelve a mostrar los elementos sugeridos
             escribe_matriz(matrix);             // Muestra matriz con los elementos visibles
         }
