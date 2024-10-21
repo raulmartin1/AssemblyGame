@@ -485,7 +485,7 @@ int main(void)
 									//visualitzar b�
 			recombina_elementos(matrix);
 			escribe_matriz_testing(matrix);
-			retardo(15);
+			retardo(50);
 		}
 		
 	} while (1);
