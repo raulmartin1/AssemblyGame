@@ -243,6 +243,9 @@ void inicializa_nivel(char mat[][COLUMNS], unsigned char lev,
 	y, en caso de que se genere alguna secuencia, decrementa el nÃºmero de
 	movimientos y retorna un cÃ³digo diferente de cero.
 */
+
+
+
 unsigned char procesa_pulsacion(char mat[][COLUMNS], 
 							short p, unsigned char *m, unsigned char g)
 {
@@ -275,6 +278,10 @@ unsigned char procesa_pulsacion(char mat[][COLUMNS],
 	}
 	return(result);
 }
+
+
+
+
 
 
 #ifdef TRUCOS
@@ -443,6 +450,7 @@ void procesa_sugerencia(char mat[][COLUMNS], unsigned short lap)
 
 
 
+<<<<<<< HEAD
 /* Programa principal: control general del juego */
 int main(void)
 {
