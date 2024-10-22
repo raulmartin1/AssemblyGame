@@ -47,7 +47,7 @@ inicializa_matriz:
 
 		push {r0-r8, lr}			
 		
-		mov r8, r0					@;pasamos a r8 la direccion base de la matriz de juego porque r0 la tendremos que usar en la funcion mod_random
+		mov r8, r0					@;pasamos a r8 la direccion base de la matriz de juego porque r0 la tendremos que usar en la funcion mod_random.
 		ldr r7, =mapas				
 		mov r5, #ROWS*COLUMNS		
 		mul r5, r1					
