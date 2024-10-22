@@ -6,10 +6,10 @@
 	(2Âº curso de Grado de IngenierÃ­a InformÃ¡tica - ETSE - URV)
 	
 	Analista-programador: santiago.romani@urv.cat
-	Programador 1: xxx.xxx@estudiants.urv.cat
+	Programador 1: david.quintana@estudiants.urv.cat
 	Programador 2: yyy.yyy@estudiants.urv.cat
-	Programador 3: zzz.zzz@estudiants.urv.cat
-	Programador 4: uuu.uuu@estudiants.urv.cat
+	Programador 3: nicolas.canton@estudiants.urv.cat
+	Programador 4: raul.martinm@estudiants.urv.cat
 
 ------------------------------------------------------------------------------*/
 #include <nds.h>
@@ -448,9 +448,6 @@ void procesa_sugerencia(char mat[][COLUMNS], unsigned short lap)
 
 
 
-
-
-<<<<<<< HEAD
 /* Programa principal: control general del juego */
 int main(void)
 {

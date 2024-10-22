@@ -243,8 +243,6 @@ baja_verticales:
 		mov r0, r10               @; Guardar el resultado (si hubo movimientos)
 		pop {r1-r3, r5-r11, pc}
 
-
-
 @; baja_laterales(mat): rutina para bajar elementos hacia las posiciones vacías
 @;	en diagonal; cada llamada a la función baja múltiples elementos una posición
 @;	y devuelve cierto (1) si se ha realizado algún movimiento.
@@ -370,6 +368,4 @@ baja_laterales:
 		mov r0, r10
 		pop {r1-r3, r5-r12, pc}
 
-
 .end
-
