@@ -59,13 +59,15 @@ inicializa_matriz:
 		mov r2, #0					@;inicializamos r2 y la usamos como contador para inicializar las columnas porque mas adelante la funcion cuenta_repeticiones exige que sea este registro
 		
 	.Lnumero_columna:
-		ldrb r5, [r7, r6]			
-		cmp r5, #0					
-		beq	.Lbucle_random			@;si detectamos que la casilla esta vacia saltamos al bucle random para poner un elemento basico 
-		cmp r5, #8					
-		beq .Lbucle_random			@;si detectamos que hay una gelatina simple vacia saltamos al bucle random para poner un elemento de gelatina simple
-		cmp r5, #16					
-		beq .Lbucle_random			@;si detectamos que hay una gelatina doble vacia saltamos al bucle random para poner un elemento de gelatina doble
+		ldrb r5, [r7, r6]	
+									@;cmp r5, #0					
+									@;beq	.Lbucle_random			@;si detectamos que la casilla esta vacia saltamos al bucle random para poner un elemento basico 
+									@;cmp r5, #8					
+									@;beq .Lbucle_random			@;si detectamos que hay una gelatina simple vacia saltamos al bucle random para poner un elemento de gelatina simple
+									@;cmp r5, #16					
+									@;beq .Lbucle_random			@;si detectamos que hay una gelatina doble vacia saltamos al bucle random para poner un elemento de gelatina doble
+		tst r5, #0x07
+		beq .Lbucle_random
 		strb r5, [r8, r6]			@;si es un bloque solido o un hueco lo copiamos y passem a la siguiente casilla
 		b .Lfinal					
 		
@@ -80,12 +82,12 @@ inicializa_matriz:
 		strb r4, [r8, r6]			@;copio el nuevo valor de la casilla en la matriz de joc
 		bl cuenta_repeticiones		
 		cmp r0, #3					@;comprovamos que no haya una solucion de 3 o mas seguidas iguales
-		bge .Lbucle_random			@;si es asi repetimos el bucle 
+		bhs .Lbucle_random			@;si es asi repetimos el bucle 
 		mov r3, #3					@;pasamos la direccion norte(vertical) a r3 como pide la funcion cuenta_repeticiones
 		mov r0, r8					
 		bl cuenta_repeticiones	 
 		cmp r0, #3					@;comprovamos que no haya una solucion de 3 o mas seguidas iguales
-		bge .Lbucle_random			@;si es asi repetimos el bucle
+		bhs .Lbucle_random			@;si es asi repetimos el bucle
 		
 	.Lfinal:						
 		add r6, #1					@;avanzamos posicion
@@ -118,10 +120,11 @@ inicializa_matriz:
 @;			y con posibles combinaciones
 @;	Parámetros:
 @;		R0 = dirección base de la matriz de juego
+
 	.global recombina_elementos
 recombina_elementos:
 
-		push {r0-r12, lr}
+		push {r0-r10, lr}
 		
 		mov r4, r0					@;pasamos a r4 la direccion base de la matriz de juego porque r0 la tendremos que usar mas adelante
 		ldr r7, =mat_recomb1		
@@ -133,16 +136,22 @@ recombina_elementos:
 	.Lnumero_filas1:
 		mov r2, #0					@;inicializamos columnas
 	.Lnumero_columna1:
-		mov r3, #COLUMNS			
-		mul r12, r1, r3				
-		add r6, r12, r2				@;preparamos el puntero
+									@;mov r3, #COLUMNS			
+									@;mul r12, r1, r3				@;PREGUNTAR SI HACE FALTA PREPARAR ASI EL PUNTERO O SI SIMPLEMENTE SE PUEDE INICIAR A 0 Y YA ESTA
+									@;add r6, r12, r2				@;preparamos el puntero
 		ldrb r3, [r4, r6]			@;obtenemos el valor de la casilla indicada
-		cmp r3, #0
+		mov r0, r3
+		and r0, #0x7
+		cmp r0, #7
 		beq .Lguardar_0
-		cmp r3, #7
+		tst r3, #0x07
 		beq .Lguardar_0
-		cmp r3, #15
-		beq .Lguardar_0
+									@;cmp r3, #0
+									@;beq .Lguardar_0
+									@;cmp r3, #7
+									@;beq .Lguardar_0
+									@;cmp r3, #15
+									@;beq .Lguardar_0
 		mov r5, r3, lsr#3
 		and r5, #0x03
 		cmp r5, #0
@@ -151,7 +160,6 @@ recombina_elementos:
 		beq .Lguardar_gelsimp1
 		cmp r5, #2
 		beq .Lguardar_geldobl1
-		
 	.Lguardar_0:
 		mov r3, #0
 		strb r3, [r7, r6]
@@ -167,7 +175,6 @@ recombina_elementos:
 		sub r5, r3, #16
 		strb r5, [r7,r6]
 		b .Lfinal_construir1
-		
 	.Lfinal_construir1:
 		add r6, #1					@;avanza posicion
 		add r2, #1					@;avanza columna
@@ -178,51 +185,30 @@ recombina_elementos:
 		blo .Lnumero_filas1			@;si no esta en el final avanza al siguiente elemento
 		
 		
-	.LConstruirMatriu2:
+	.LCopiarEnMatriu2:
 		mov r6, #0					@;inicializamos puntero
 		mov r1, #0					@;inicializamos filas
-		@;recorrer matriu de joc:
 	.Lnumero_filas2:
 		mov r2, #0					@;inicializamos columnas
 	.Lnumero_columna2:
-		mov r3, #COLUMNS			
-		mul r12, r1, r3				
-		add r6, r12, r2				@;preparamos el puntero
-		ldrb r3, [r4, r6]			@;obtenemos el valor de la casilla indicada
-		cmp r3, #0
-		beq .Lguardar_0_2
-		cmp r3, #7
-		beq .Lguardar_bls
-		cmp r3, #15
-		beq .Lguardar_huec
-		mov r5, r3, lsr#3
-		and r5, #0x03
-		cmp r5, #0
-		beq .Lguardar_0_2
-		cmp r5, #1
-		beq .Lguardar_8
-		cmp r5, #2
-		beq .Lguardar_16
-		
-	.Lguardar_0_2:
-		mov r3, #0
+		ldrb r3, [r4, r6]			@;obtenemos valor de la matriz de juego
+		tst r3, #0x07
+		beq .Lguardar_valor2
+		mov r0, r3
+		and r0, #0b111
+		cmp r0, #7
+		beq .Lguardar_valor2
+		and r3, #0b11000
+									@;and r0, #0x03
+									@;cmp r0, #0
+									@;beq .Lguardar_elemsimp3
+									@;cmp r0, #1
+									@;beq .Lguardar_gelsimp3
+									@;cmp r0, #2
+									@;beq .Lguardar_geldobl3
+	.Lguardar_valor2:
 		strb r3, [r8, r6]
 		b .Lfinal_construir2
-	.Lguardar_bls:
-		strb r3, [r8, r6]
-		b .Lfinal_construir2
-	.Lguardar_huec:
-		strb r3, [r8, r6]
-		b .Lfinal_construir2
-	.Lguardar_8:
-		mov r3, #8
-		strb r3, [r8,r6]
-		b .Lfinal_construir2
-	.Lguardar_16:
-		mov r3, #16
-		strb r3, [r8, r6]
-		b .Lfinal_construir2
-		
 	.Lfinal_construir2:
 		add r6, #1					@;avanza posicion
 		add r2, #1					@;avanza columna
@@ -230,107 +216,60 @@ recombina_elementos:
 		blo .Lnumero_columna2		@;si no esta en el final de la fila avanza al siguiente elemento
 		add r1, #1					@;avanza fila
 		cmp r1, #ROWS				
-		blo .Lnumero_filas2			@;si no esta en el final avanza al siguiente elemento
+		blo .Lnumero_filas2			@;si no esta en el final avanza al siguiente elemento		
 		
 		
-	.Linici_recombinacio:
+	.LConstruirMatriuJ:
 		mov r6, #0					@;inicializamos puntero
 		mov r1, #0					@;inicializamos filas
-	.Lnumero_filas_recomb:
+	.Lnumero_filasJ:
 		mov r2, #0					@;inicializamos columnas
-	.Lnumero_columna_recomb:
-		mov r3, #COLUMNS			
-		mul r12, r1, r3				
-		add r6, r12, r2				@;preparamos el puntero
+	.Lnumero_columnaJ:
 		ldrb r3, [r4, r6]
-		and r3, #0x07
-		cmp r3, #0
-		beq .Lfinal_recombinacio
-		ldrb r3, [r8, r6]			@;obtenemos valor
-		and r3, #0x07
-		cmp r3, #0					
-		beq .Lescollir_random		@;buscamos un valor en la mtriz1    //PROBLEMAAAA!!
-		b .Lfinal_recombinacio			
-		mov r9, #0					@;control para evitar un bucle infinito con un contador 
-	.Lescollir_random:
-		mov r0, #COLUMNS			
-		bl mod_random				@;obtenemos un numero de columna aleatorio
-		mov r11, r0					
-		mov r0, #ROWS				
-		bl mod_random				@;obtenemos un numero de fila aleatorio
-		mov r5, r0					
-		mov r0, #COLUMNS			
-		mul r10, r5, r0				
-		add r10, r11				@;preparamos el puntero
-		ldrb r0, [r7, r10]			@;obtenemos un valor de una casilla aleatoria de la matriz1
-		add r9, #1					
-		cmp r9, #2000				@;controlamos que no entre en un bucle infinito
-		beq .Lmatriu_final				
-		cmp r0, #0					@;miramos si la casilla ya esta usada, porque si es asi escogeremos otra
-		beq .Lescollir_random		
-		add r0, r3					
-		strb r0, [r8, r6]			@;guardamos el valor de la casilla aleatoria en la matriz2
-		mov r12, r11				@;guardamos la columna en r12
-		mov r0, r8					
-		mov r11, r3					
+		tst r3, #0x07
+		beq .Lfinal_construirJ
+		mov r0, r3
+		and r0, #0x7
+		cmp r0, #7
+		beq .Lfinal_construirJ
+	.Lpos_aleatori:
+		mov r0, #ROWS*COLUMNS
+		bl mod_random
+		mov r9, r0
+		ldrb r0, [r7, r9]	
+		cmp r0, #0
+		beq .Lpos_aleatori
+		ldrb r5, [r8, r6]
+		add r10, r5, r0
+		strb r10, [r8, r6]
+		mov r0, r8
 		mov r3, #2					@;pasamos la direccion oeste(horizontal) a r3 como pide la funcion cuenta_repeticiones
-		bl cuenta_repeticiones		
-		mov r3, r11					@;recuperemos el valor de r3
-		cmp r0, #3					
-		bhs .Lescollir_random		@;si hay secuencia volvemos a buscar otra casilla aleatoria
-		mov r0, r8					
-		mov r11, r3					
-		mov r3, #3					@;pasamos la direccion norte(vertical) a r3 como pide la funcion cuenta_repeticiones
-		bl cuenta_repeticiones		
-		mov r3, r11					@;recuperem el valor de r3
-		cmp r0, #3					
-		bhs .Lescollir_random		@;si hay secuencia volvemos a buscar otra casilla aleatoria
-		mov r3, #0					
-		strb r3, [r7, r10]			@;guardamos un 0 en la matriz1 para no volver a escoger esa casilla
-		@;Subtarea 2Ia
-		mov r3, r2					@;r3=columna destino
-		mov r0, r5					@;r0=fila origen
-		mov r10, r2					@;guardamos valor columnas en r10
-		mov r2, r1					@;r2=fila desti
-		mov r11, r1					@;guardamos valor filas en r11
-		mov r1, r12					@;r1=columna origen
-		@;bl activa_elemento
-		mov r2, r10					@;recuperem el valor de l'index de columnes
-		mov r1, r11					@;recuperem el valor de l'index de files
-	.Lfinal_recombinacio:
+		bl cuenta_repeticiones
+		cmp r0, #3
+		bhs .Lrecuperar_valor_m2
+		mov r0, r8
+		mov r3, #3
+		bl cuenta_repeticiones
+		cmp r0, #3
+		bhs .Lrecuperar_valor_m2
+		mov r0, #0
+		strb r0, [r7, r9]
+		b .Lcopiar_m2_J
+	.Lrecuperar_valor_m2:
+		strb r5, [r8, r6]
+		b .Lpos_aleatori
+	.Lcopiar_m2_J:
+		strb r10, [r4, r6]
+	.Lfinal_construirJ:
 		add r6, #1					@;avanza posicion
 		add r2, #1					@;avanza columna
 		cmp r2, #COLUMNS			
-		blo .Lnumero_columna_recomb		@;si no esta en el final de la fila avanza al siguiente elemento
+		blo .Lnumero_columnaJ		@;si no esta en el final de la fila avanza al siguiente elemento
 		add r1, #1					@;avanza fila
 		cmp r1, #ROWS				
-		blo .Lnumero_filas_recomb	@;si no esta en el final avanza al siguiente elemento
+		blo .Lnumero_filasJ			@;si no esta en el final avanza al siguiente elemento
 		
-	.Lmatriu_final:
-		mov r0, r8					
-		bl hay_combinacion			@;coprobamos si hay alguna combinacion posible
-		cmp r0, #0					@;en caso de que no haya ninguna sequencia possible volvemos a hacer la funcio
-		beq .LConstruirMatriu1			
-		mov r6, #0					@;inicializamos puntero
-		mov r1, #0					@;inicializamos filas
-	.Lnumero_filas_mfinal:
-		mov r2, #0					@;inicializamos columnas
-	.Lnumero_columna_mfinal:
-		mov r3, #COLUMNS			
-		mul r12, r1, r3				
-		add r6, r12, r2				@;preparamos puntero
-		ldrb r3, [r8, r6]			
-		strb r3, [r4, r6]			@;guardemos en la matriz de juego el valor de la matriz2 
-	.Lacabar_mfinal:
-		add r6, #1					@;avanza posicion
-		add r2, #1					@;avanza columna
-		cmp r2, #COLUMNS			
-		blo .Lnumero_columna_mfinal		@;si no esta en el final de la fila avanza al siguiente elemento
-		add r1, #1					@;avanza fila
-		cmp r1, #ROWS				
-		blo .Lnumero_filas_mfinal		@;si no esta en el final avanza al siguiente elemento
-		
-		pop {r0-r12, pc}
+		pop {r0-r10, pc}
 
 
 @;:::RUTINAS DE SOPORTE:::
