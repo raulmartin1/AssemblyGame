@@ -1,6 +1,6 @@
 ﻿/*------------------------------------------------------------------------------
 
-	$ candy1_main.c $
+	$ candy1_main.c $b
 
 	Programa principal para la práctica de Computadores: candy-crash para NDS
 	(2º curso de Grado de Ingeniería Informática - ETSE - URV)
@@ -452,7 +452,7 @@ void procesa_sugerencia(char mat[][COLUMNS], unsigned short lap)
 
 
 /* ---------------------------------------------------------------- */
-/* candy1_main.c : función principal main() para test de tarea 1E 	*/
+/* candy1_main.c : función principal main() para test de tarea 1E	*/
 /* ---------------------------------------------------------------- */
 
 
