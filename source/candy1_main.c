@@ -256,7 +256,7 @@ unsigned char procesa_pulsacion(char mat[][COLUMNS],
 	{
 		intercambia_posiciones(mat, mX, mY, dX, dY);
 		escribe_matriz(mat);
-		if (hay_secuencia(mat))
+		/*if (hay_secuencia(mat))
 		{
 			(*m)--;				// un movimiento utilizado
 			borra_puntuaciones();
@@ -265,7 +265,7 @@ unsigned char procesa_pulsacion(char mat[][COLUMNS],
 			guarda_backup(mat, p, *m, g);
 #endif
 		}
-		else						
+		else*/						
 		{				// si no se genera secuencia,
 			retardo(3);			// deshace el cambio
 			intercambia_posiciones(mat, mX, mY, dX, dY);
@@ -326,7 +326,7 @@ void testing(unsigned char *est, char mat[][COLUMNS], unsigned char lev,
 void procesa_rotura(char mat[][COLUMNS], unsigned char lev,
 								short *p, unsigned char m, unsigned char *g)
 {
-	elimina_secuencias(mat, mat_mar);
+	//elimina_secuencias(mat, mat_mar);
 	escribe_matriz(mat);
 	*p += calcula_puntuaciones(mat_mar);
 	if (*g > 0) *g = cuenta_gelatinas(matrix);
@@ -357,7 +357,7 @@ unsigned char procesa_caida(char mat[][COLUMNS],
 		guarda_backup(mat, p, m, g);
 #endif
 	}
-	else
+	/*else
 	{						// cuando ya no hay mÃ¡s bajadas
 		if (hay_secuencia(matrix))
 		{
@@ -365,7 +365,7 @@ unsigned char procesa_caida(char mat[][COLUMNS],
 			result = PC_ENDSEQ;
 		}
 		else result = PC_ENDNOSQ;
-	}
+	}*/
 	return(result);
 }
 
@@ -477,8 +477,8 @@ int main(void)
 			case E_INIT:		//////	ESTADO DE INICIALIZACIÃ“N	//////
 						inicializa_nivel(matrix, level, &points, &moves, &gelees);
 						lapse = 0;
-						if (hay_secuencia(matrix))	state = E_BREAK;
-						else if (!hay_combinacion(matrix))	state = E_CHECK;
+						//if (hay_secuencia(matrix))	state = E_BREAK;
+						if (!hay_combinacion(matrix))	state = E_CHECK;
 						else	state = E_PLAY;
 						break;
 			case E_PLAY:		//////	ESTADO DE INTERACCIÃ“N CON USUARIO //////
