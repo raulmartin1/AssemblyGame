@@ -33,155 +33,165 @@ hay_combinacion:
 		mov r1, #0 @; inicializar fila=0
 		mov r2, #0 @; inizializar col=0
 		mov r0, #6 @; inicializamos r0=6(sin secuencia)
-	
-		.Lrecorrer_filas: @; ==comprovar combinacion a la derecha==
-			cmp r1, #ROWS
-			bge .Lfin_filas	 @; si fila>=ROWS salta al final del bucle
+		mov r5, #0 @; desplaçament 
+		mov r8, #0 @; gelatina especial, 1->si, 0->no
+		mov r9, #0 @; desplaçament de gelatina costat
+		
+		b .Lcarregar_gelatina
+		.Ldetecta_horitzontal:  
+			cmp r2, #COLUMNS-1
+			beq .Ldetecta_vertical
 			
-			.Lrecorrer_columnas:
-			cmp r2, #COLUMNS-1 @; si col>=COLUMNS-1 salta al final del bucle
-			bge .Lfin_columnas
+			add r9, r5, #1
+			ldrb r6, [r4, r9]	@; gelatina de la derecha
+			ldrb r7, [r4, r5]	@; gelatina actual
+			and r10, r6, #0x07 @; r10= mascara de la gelatina derecha per poder comparar bits baixos(r10=bits baixos)
+			and r11, r7, #0x07 @; r11= mascara de la gelatina actual
+			cmp r10, r11		@; si son iguals, si son iguales saltes a comprovar verticalment
+			beq .Ldetecta_vertical
+			mov r12, r6
+			bl validar_gel		@; comprovem que la gelatina de la dreta no sigui gelatina especial
+			mov r6, r12
+			cmp r8, #0			@; si es 0, hay bloque especial
+			beq .Ldetecta_vertical
 			
-			mov r3, #COLUMNS @;Encontramos la posicion de la matriz 
-			mul r5, r1, r3	 @; r5= fila*COLUMNS
-			add r5, r2	     @; r5= (fila*COLUMNS)+columna
-			ldrb r6, [r4, r5] @; matriu[i][j], gelatina actual
-			
-			mov r10, r6		  @; guardamos el valor de la gelatian en r10
-			tst r6, #0x07		@; comprobamos 0(0000) 8(1000) 16(10000), comprueba si los 3 bits menos significativos son 0
-			beq .Lsaltar_posicion
-			and r6 ,#0x7		@; nos quedamos con los 3 bits menos signficativos de r6 en r6
-			cmp r6, #7			@; comprobamos 7(0111) y 15(1111)
-			beq .Lsaltar_posicion
-			mov r6, r10
-			
-			add r5, #1		@; Sumamos una posicion a la derecha
-			ldrb r7, [r4, r5] 	@; cargar la gelatina de la derecha en r7
-			
-			mov r10, r7		  @; guardamos el valor de la gelatian en r10
-			tst r7, #0x07		@; comprobamos 0(0000) 8(1000) 16(10000), comprueba si los 3 bits menos significativos son 0)
-			beq .Lsaltar_posicion
-			and r7 ,#0x7		@; nos quedamos con los 3 bits menos signficativos de r7 en r7
-			cmp r7, #7			@; comprobamos 7(0111) y 15(1111)
-			beq .Lsaltar_posicion
-			mov r7, r10
-			
-			and r8, r6, #0x07 @; r8= mascara de la gelatina actual per poder comparar bits baixos(r8=bits baixos)
-			and r9, r7, #0x07 @; r9= mascara de la gelatina de la dreta
-			cmp r8, r9	@; comaparem si son iguals no intercanvien posicio
-			beq .LgelatinaIgualH @; si gelatina de la derecha igual salta
-			strb r6, [r4, r5]	@; guardem la gelatina de la actual en la dreta
-			sub r5, #1			@; obtenemos la posicion original de la que se ha movido
-			strb r7, [r4, r5]	@; la gelatina de la derecha en la poscion que era de la actual
-			
-			.LgelatinaIgualH:	@;gelatinas iguales Horizontales
+			bl intercanvi_horitzontal
 			bl detecta_orientacion
-			cmp r0, #6				@; 6-> no hay secuencia
-			bne .Lhay_combinacionH @; si troba combinacio salta al final
-			add r2, #1
-			bl detecta_orientacion @; mira si hay sequencia en la gelatina de la derecha
+			bl intercanvi_horitzontal
+			cmp r0, #6			
+			bne .Lhay_combinacion	@; si r0 != 6 -> hay combinacion
+			
+			bl intercanvi_horitzontal
+			add r2, #1				@; miramos si hay secuencia en la gelatina de la derecha 
+			bl detecta_orientacion
+			bl intercanvi_horitzontal
 			sub r2, #1
 			cmp r0, #6
-			bne .Lhay_combinacionH
-			cmp r8, r9
+			bne .Lhay_combinacion
+			
+		.Ldetecta_vertical:
+			cmp r1, #ROWS-1			@; si llega ultima fila salta
 			beq .Lsaltar_posicion
-			strb r6, [r4,r5]	@; tornem a colocar la gelatina actual en la seva posicio original
-			add r5, #1
-			strb r7, [r4, r5]	@; la gelatina de la dreta en la seva posicio original
-			.Lsaltar_posicion:
-			add r2, #1			@; col++
-			b .Lrecorrer_columnas	@;seguent columna
-			.Lfin_columnas:
-			add r1, #1 @; fila++
-			mov r2, #0	@; col=0
-		b .Lrecorrer_filas	@; seguent fila
-		.Lfin_filas:
-		mov r1, #0	@; primera posicion de la tabla
-		mov r2, #0
-		.Lrecorrer_filas2: @; ==comprovacion combinacion hacia abajo==
-			cmp r1, #ROWS-1
-			bge .Lsaltar_final
-			.Lrecorrer_columnas2:
-			cmp r2, #COLUMNS
-			bge .Lfin_columnas2
-			mul r5, r1, r3  @; r5= fila*COLUMNS
-			add r5, r2	     @; r5= (fila*COLUMNS)+columna
-			ldrb r6, [r4, r5] @; matriu[i][j], gelatina actual 
 			
-			mov r10, r6		  @; guardamos el valor de la gelatian en r10
-			tst r6, #0x07		@; comprobamos 0(0000) 8(1000) 16(10000), comprueba si los 3 bits menos significativos son 0)
-			beq .Lsaltar_posicion2
-			and r6 ,#0x7		@; nos quedamos con los 3 bits menos signficativos de r6 en r6
-			cmp r6, #7			@; comprobamos 7(0111) y 15(1111)
-			beq .Lsaltar_posicion2
-			mov r6, r10
+			add r9, r5, #COLUMNS	@; avanzar a la posicion de debajo	
+			ldrb r6, [r4, r9]		@; gelatina de la derecha	
+			ldrb r7, [r4, r5]		@; gelatina actual
+			and r10, r6, #0x07 		@; r10= mascara de la gelatina debajo per poder comparar bits baixos(r10=bits baixos)
+			and r11, r7, #0x07 		@; r11= mascara de la gelatina actual 
+			cmp r10, r11
+			beq .Lsaltar_posicion
+			mov r12, r6
+			bl validar_gel
+			mov r6, r12
+			cmp r8, #0
+			beq .Lsaltar_posicion
 			
-			add r5, r3		@; r5 = r5+COLUMNS, bajamos una posicion (siguiente fila)
-			ldrb r7, [r4, r5] 	@; cargar la gelatina de debajo en r7
-			
-			mov r10, r7		  @; guardamos el valor de la gelatian en r10
-			tst r7, #0x07		@; comprobamos 0(0000) 8(1000) 16(10000), comprueba si los 3 bits menos significativos son 0)
-			beq .Lsaltar_posicion2
-			and r7 ,#0x7		@; nos quedamos con los 3 bits menos signficativos de r6 en r6
-			cmp r7, #7			@; comprobamos 7(0111) y 15(1111)
-			beq .Lsaltar_posicion2
-			mov r7, r10
-			
-			and r8, r6, #0x07 @; r8= mascara de la gelatina actual per poder comparar bits baixos(r8=bits baixos)
-			and r9, r7, #0x07 @; r9= mascara de la gelatina de debajo
-			cmp r8, r9		@; comaparem si son iguals no intercanvien posicio
-			beq .LgelatinaIgualV
-			strb r6, [r4, r5] @; gelatina actual al lloc de la de sota
-			sub r5, r3		  @; restem una COLUMNS per pujar una fila
-			strb r7, [r4, r5] @; gelatina de sota al lloc de la actual
-			
-			.LgelatinaIgualV:
-			bl detecta_orientacion	@;comprova si hay combinacion en la posicion de la actual
+			bl intercanvi_vertical
+			bl detecta_orientacion	@; detectar combinacion en la actual
+			bl intercanvi_vertical
 			cmp r0, #6
-			bne .Lhay_combinacionV @; si hi ha combinacio (r0 != 6) salta al final
-			add r1, #1				@; fila++, posicio de sota
-			bl detecta_orientacion @;comprova si hay combinacion en la de debajo 
+			bne .Lhay_combinacion
+			
+			bl intercanvi_vertical
+			add r1, #1				@; detectar combinacion en la de abajo
+			bl detecta_orientacion
+			bl intercanvi_vertical
 			sub r1, #1
 			cmp r0, #6
-			bne .Lhay_combinacionV
-			cmp r8, r9
-			beq .Lsaltar_posicion2	@; si no eran iguals tornem a colocarlas al lloc original
-			strb r6, [r4, r5]		@; gelatina actual al seu lloc	
-			add r5, r3
-			strb r7, [r4, r5]		@; gelatina de sota al seu lloc
-			.Lsaltar_posicion2:
-			add r2, #1				@; c++ seguent columna
-			b .Lrecorrer_columnas2
-			.Lfin_columnas2:
-			add r1, #1				@; fila++
-			mov r2, #0				@; col++, primera columna de la siguiente fila
-		b .Lrecorrer_filas2
+			bne .Lhay_combinacion
+		b .Lsaltar_posicion
 		
-		.Lhay_combinacionH:	@;coloquem les gelatines al seu lloc original en cas de combinacio trobada horitzontal
-		cmp r8, r9
-		beq .Lsaltar_final 
-		strb r6, [r4, r5]
-		add r5, #1
-		strb r7, [r4, r5]
-		b .Lsaltar_final
-		.Lhay_combinacionV: @; coloquem les gelatines al seu lloc origina en cas de combinacion trobada vertical
-		cmp r8, r9
-		beq .Lsaltar_final 
-		strb r6, [r4, r5]
-		add r5, r3
-		strb r7, [r4, r5]
+		.Lcarregar_gelatina:
+			ldrb r6, [r4, r5]	@; matriu[i][j], gelatina actual
+			mov r10, r6			@; guardem la gelatina (perque en validar_gel es modifica r6)
+			bl validar_gel		@; comprovem que no sigue una gelatina especial
+			mov r6, r10
+			cmp r8, #1			
+			beq .Ldetecta_horitzontal @; si es bloc especial salta a comprovar verticalment
 		
-		.Lsaltar_final:
-		cmp r0, #6
-		bne .Lcomb_trobada
-		mov r0, #0	@; si r0=6 -> r0=0 no hay combinacion
-		b .Lfinal 
+		.Lsaltar_posicion:
+			add r2, #1
+			add r5, #1
+			cmp r2, #COLUMNS		@; si col>=COLUMNS salta a la seguent fila
+			bne .Lcarregar_gelatina
+			mov r2, #0
+			
+		.Lfin_columnas:
+			add r1, #1
+			
+			cmp r1, #ROWS		@; si fila>=ROWS alshores ha arribat al final (no hi ha combinacio)
+			bne .Lcarregar_gelatina	
+			mov r0, #0
+			b .Lfinal
+				
+		.Lhay_combinacion:
+			mov r0, #1
 		
-		.Lcomb_trobada:
-		mov r0, #1		@; si r0!=6 -> r0=1 hay combinacion
-		.Lfinal:
+		.Lfinal:				
 		pop {r1-r12, pc}
 
+@;:::RUTINAS DE SOPORTE para hay_combinacion() TAREA 1G:::
+
+@; validar_gel(gelatina): comprobar si hay un bloque especial
+@;	Parámetros:
+@;		R6 = gelatina
+@;	Resultado:
+@;		R8 = 1 si no hay bloque especial y 0 si hay bloque especial
+validar_gel:
+	push {lr}
+	tst r6, #0x07		@; comprobamos 0(0000) 8(1000) 16(10000)
+	beq .Lbloc_especial
+	
+	and r6 ,#0x7		@; nos quedamos con los 3 bits menos signficativos de r7 en r7
+	cmp r6, #7			@; comprobamos 7(0111) y 15(1111)
+	beq .Lbloc_especial
+	
+	cmp r6, #15
+	beq .Lbloc_especial
+	
+	mov r8, #1			@; r8=1 -> no hay bloque especial
+	b .Lgelatina_valida
+	
+	.Lbloc_especial:
+		mov r8, #0		@; r8=0 -> hay bloque especial
+	.Lgelatina_valida:
+	pop {pc}
+	
+@; intercanvi_horitzontal(*matriz, gelatina_actual, gelatina_derecha): cambia la gelatina de posicion a la derecha y al reves
+@;	Parámetros:
+@;		R4 = direccion de la matriz base
+@;		R5 = posicion que sera actual
+@;		R9 = posicion que sera de la derecha
+@;	Resultado:
+@;		Matriz devuelta por referencia
+@;
+intercanvi_horitzontal:
+	push {r6, r7, r9, lr}
+		add r9, r5, #1
+		ldrb r6, [r4, r5]	@; r6 = matriu[i][j]
+		ldrb r7, [r4, r9]	@; r7 = matriu[i][j+1]
+		
+		strb r7, [r4, r5]	@; se cambian de posicion
+		strb r6, [r4, r9]
+	pop {r6, r7, r9, pc}
+
+@; intercanvi_vertical(*matriz, gelatina_actual, gelatina_debajo): cambia la gelatina de posicion abajo y al reves
+@;	Parámetros:
+@;		R4 = direccion de la matriz base
+@;		R5 = posicion que sera actual
+@;		R9 = posicion que sera de debajo
+@;	Resultado:
+@;		Matriz devuelta por referencia
+@;
+intercanvi_vertical:
+	push {r6, r7, r9, lr}
+		add r9, r5, #COLUMNS
+		ldrb r6, [r4, r5]	@; r6 = matriu[i][j]
+		ldrb r7,[r4, r9]	@; r7 = matriu[i+1][j]
+		
+		strb r7, [r4, r5]	@; se cambian de posicion
+		strb r6, [r4, r9]
+	pop {r6, r7, r9, pc}
 
 @;TAREA 1H;
 @; sugiere_combinacion(*matriz, *psug): rutina para detectar una combinación
@@ -202,7 +212,7 @@ hay_combinacion:
 @;				guardarán las coordenadas (x1,y1,x2,y2,x3,y3), consecutivamente.
 	.global sugiere_combinacion
 sugiere_combinacion:
-		push {r2-r12, lr}
+		push {r0-r12, lr}
 		mov r4, r0	@; guaradamos direccion base de la matriz de juego
 		mov r6, r1	@; guardamos direccion vector de posiciones
 		
@@ -334,7 +344,7 @@ sugiere_combinacion:
 		mov r0, r6					@; recuperamos direccion vector de posiciones
 		bl genera_posiciones		@; si ha encontrado la sugerencia-> genera las posiciones de sugerencia
 			
-		pop {r2-r12, pc}
+		pop {r0-r12, pc}
 				
 		
 
@@ -360,7 +370,7 @@ sugiere_combinacion:
 @;	Resultado:
 @;		vector de posiciones (x1,y1,x2,y2,x3,y3), devuelto por referencia
 genera_posiciones:
-		push {r1-r12, lr}
+		push {r0-r12, lr}
 		cmp r4, #0	@; comparamos c.p.i=0 , c.ori pot ser 1,2,3 o 5
 		bne .Lsaltar_cpi0
 			mov r5, #0 @; inicializamos vector
@@ -623,7 +633,7 @@ genera_posiciones:
 		.Lsaltar_cpi3:
 		.Lfi_generar:
 			
-		pop {r1-r12, pc}
+		pop {r0-r12, pc}
 		
 
 @; detecta_orientacion(f, c, mat): devuelve el código de la primera orientación

@@ -444,62 +444,73 @@ void procesa_sugerencia(char mat[][COLUMNS], unsigned short lap)
 /* candy1_main.c : función principal main() para test de tarea 1G 	*/
 /*					(requiere tener implementada la tarea 1E)		*/
 /* ---------------------------------------------------------------- */
+int resultados_esperados[MAXLEVEL] = {0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0};
 int main(void)
 {
-    unsigned char level = 0;    // nivel del juego (nivel inicial = 0)
+    unsigned char level = 0; // nivel del juego (nivel inicial = 0)
 
-    consoleDemoInit();          // Inicialización de pantalla de texto
-    printf("candyNDS (prueba tarea 1G)\n");
-    printf("\x1b[38m\x1b[1;0H  nivel: %d", level);
+    do {
+        consoleDemoInit(); // Inicialización de pantalla de texto
+        printf("candyNDS (test tarea 1G)\n");
+		
+        int correctos = 0;
+        int errores = 0;
+		
+        for (level = 0; level < MAXLEVEL; level++) {
+            printf("\x1b[2J\x1b[H"); // Limpia la pantalla antes de cada nivel
+			
+            copia_matriz(matrix, mapas[level]);
+            escribe_matriz_testing(matrix);
+			
+            int resultado_obtenido = hay_combinacion(matrix);
+			
+			printf("\x1b[43m\x1b[1;0HNivel %d\n", level);
+			
+            printf("\x1b[45mComb. obtenida:%s Esperado:%s\n",
+            resultado_obtenido ? "SI" : "NO", resultados_esperados[level] ? "SI" : "NO");
 
-    do                          // bucle principal de pruebas
-    {
-        copia_matriz(matrix, mapas[level]);    // Sustituye a inicializa_matriz()
-        escribe_matriz_testing(matrix);
+            if (resultado_obtenido == resultados_esperados[level]) {
+                printf("\x1b[42mResultado: CORRECTO\n"); 
+                correctos++;
+            } else {
+                printf("\x1b[41mResultado: INCORRECTO\n"); 
+                errores++;
+            }
+			printf("\x1b[37m");
+            if (resultado_obtenido) {
+                sugiere_combinacion(matrix, pos_sug);
+                printf("\x1b[79mSugerencia: [%d,%d],[%d,%d],[%d,%d]\n",
+                       pos_sug[0], pos_sug[1], pos_sug[2], pos_sug[3], pos_sug[4], pos_sug[5]);
 
-        if (hay_combinacion(matrix)){            // Si hay combinaciones
-			printf("\x1b[39m\x1b[3;0Hhay combinacion: SI");
-        sugiere_combinacion(matrix, pos_sug);
-		printf("Sugerencia de combinacion: [%d, %d], [%d, %d], [%d, %d]\n",
-		pos_sug[0], pos_sug[1], pos_sug[2], pos_sug[3], pos_sug[4], pos_sug[5]);
+                // Parpadeo de elementos sugeridos
+                for (int reps = 0; reps < 2; reps++) {
+                    retardo(4);                         // Espera
+                    oculta_elementos(matrix, pos_sug);  // Oculta los elementos sugeridos
+                    escribe_matriz_testing(matrix);     // Muestra matriz sin los elementos ocultos
+                    retardo(4);                         // Espera
+                    muestra_elementos(matrix, pos_sug); // Vuelve a mostrar los elementos sugeridos
+                    escribe_matriz_testing(matrix);     // Muestra matriz con los elementos visibles
+                }
+            }
 
-        // Parpadeo de elementos sugeridos
-        for (int reps = 0; reps < 2; reps++)    // Parpadea 2 veces
-        {
-            retardo(2);                         // Espera
-            oculta_elementos(matrix, pos_sug);  // Oculta los elementos sugeridos
-            escribe_matriz(matrix);             // Muestra matriz sin los elementos ocultos
-            retardo(2);                         // Espera
-            muestra_elementos(matrix, pos_sug); // Vuelve a mostrar los elementos sugeridos
-            escribe_matriz(matrix);             // Muestra matriz con los elementos visibles
+            retardo(10); // Retardo entre mapas
         }
 
-		
-		
-		}else{
-            printf("\x1b[39m\x1b[3;0Hhay combinacion: NO");
-		}
-        // Llamamos a sugiere_combinacion para obtener sugerencia en 'pos_sug'
-     
-        retardo(3);
-        printf("\x1b[39m\x1b[3;19H (pulse A/B)");
+        // Limpia la pantalla y muestra resultados
+        printf("\x1b[2J\x1b[H");
+        printf("\x1b[44mResultados del juego de pruebas:");
+        printf("\x1b[42mCorrectos: %d\n", correctos);
+        printf("\x1b[41mErrores: %d\n", errores);
+		printf("\x1b[37m");
+        printf("\x1b[46m\nPresiona 'A' para reiniciar\n");
 
-        do
-        {
+        do {
             swiWaitForVBlank();
-            scanKeys();                         // Esperar pulsación tecla 'A' o 'B'
-        } while (!(keysHeld() & (KEY_A | KEY_B)));
-
-        printf("\x1b[3;0H                               ");
-        retardo(3);
-
-        if (keysHeld() & KEY_A)                // Si pulsa 'A',
-        {                                      // Pasa al siguiente nivel
-            level = (level + 1) % MAXLEVEL;
-            printf("\x1b[38m\x1b[1;8H %d", level);
-        }
+            scanKeys();
+        } while (!(keysHeld() & KEY_A));
 
     } while (1);
 
-    return(0);
+    return 0;
 }
+
