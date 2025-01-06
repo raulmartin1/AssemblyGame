@@ -447,7 +447,6 @@ void procesa_sugerencia(char mat[][COLUMNS], unsigned short lap)
 }
 
 
-
 /* Programa principal: control general del juego */
 int main(void)
 {
@@ -521,3 +520,4 @@ int main(void)
 
 	return(0);					// nunca retornarÃ¡ del main
 }
+
